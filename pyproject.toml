@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "pixel-contraction"
+version = "0.1.0"
+description = ""
+authors = ["Kenneth <kencubed@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+numpy = "^2.1.1"
+matplotlib = "^3.9.2"
+pillow = "^10.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
