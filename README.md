@@ -1,6 +1,6 @@
 # PixelContraction
 ## Goal
-The goal of this project is to create a script that takes text-to-art generated "pixel art" image as an input and downscales that image to the true resolution of the pixel art being depicted.
+Converts text-to-art generated 'pixel' art from LLMs to true resolution pixel art assets.
 
 ## Problems
 There are many challenges involved in solving this problem.
