@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageFilter, ImageChops
 import matplotlib.pyplot as plt
+from gen_pixel_art import utils
 
 INPUT_DIR = Path(__file__).resolve().parent.parent / 'data' / 'input'
 MAX_PIXEL = 255
@@ -15,15 +16,6 @@ def read_images() -> list[Image.Image]:
         image = Image.open(image_file)
         images.append(image)
     return images
-
-def blur_image(image: Image.Image):
-    """Filters the image to denoise."""
-    #image.filter(ImageFilter.BLUR)
-    smoothed_image = image.filter(ImageFilter.GaussianBlur(radius=1))
-    return smoothed_image
-
-def enhance_image(image: Image.Image):
-    return image.filter(ImageFilter.EDGE_ENHANCE)
 
 def concatenate_images(images: list[Image.Image]) -> Image.Image:
     """Concatenates images side by side for comparison."""
@@ -112,8 +104,8 @@ def main() -> None:
     """Main access point for the script."""
     images = read_images()
     for image in images:
-        smoothed_image = blur_image(image)
-        enhanced_image = enhance_image(image)
+        smoothed_image = utils.blur(image)
+        enhanced_image = utils.enhance(image)
         get_pixel_conversion(image)
         pass
         #diff_image = ImageChops.difference(image, smoothed_image)

@@ -1,25 +1,6 @@
 from pathlib import Path
 from PIL import Image
-import numpy as np
-def compute_mse_region(full_image, test_image, region_box):
-    """
-    Compute MSE between the sub-region of 'full_image' and 'test_image'
-    over the same bounding box (region_box = (left, top, right, bottom)).
-    
-    Both images should be in the same mode (e.g., RGBA).
-    """
-    # Crop the relevant region
-    region_full = full_image.crop(region_box)
-    region_test = test_image.crop(region_box)
-    
-    arr_full = np.asarray(region_full, dtype=np.float32)
-    arr_test = np.asarray(region_test, dtype=np.float32)
-    
-    # Ensure shapes match
-    if arr_full.shape != arr_test.shape:
-        return np.inf
-    
-    return np.mean((arr_full - arr_test) ** 2)
+from gen_pixel_art import utils
 
 def estimate_scale_factor_with_offset(image, max_scale=100):
     """
@@ -51,33 +32,33 @@ def estimate_scale_factor_with_offset(image, max_scale=100):
     best_offset = (0, 0)
     best_mse_val = float('inf')
     best_img = None
-    
+
     # For each possible scale factor
     for scale in range(2, max_scale + 1):
         if scale > width or scale > height:
             break
-        
+
         # For each offset in [0, k)
         for offset_y in range(scale):
             for offset_x in range(scale):
-                
+
                 # Compute the largest sub-region (width, height) that is a multiple of k
                 # starting at (offset_x, offset_y).
                 region_width = (width - offset_x) // scale * scale
                 region_height = (height - offset_y) // scale * scale
                 if region_width <= 0 or region_height <= 0:
                     continue
-                
+
                 # Define the bounding box of the region
                 left = offset_x
                 top = offset_y
                 right = offset_x + region_width
                 bottom = offset_y + region_height
                 region_box = (left, top, right, bottom)
-                
+
                 # Crop the sub-region
                 cropped = image.crop(region_box)
-                
+
                 # Downscale (area-based with BOX)
                 down_w = region_width // scale
                 down_h = region_height // scale
@@ -85,26 +66,26 @@ def estimate_scale_factor_with_offset(image, max_scale=100):
                 if down_w < 1 or down_h < 1:
                     continue
                 downscaled = cropped.resize((down_w, down_h), Image.Resampling.BOX)
-                
+
                 # Upscale back to original sub-region size
                 upscaled = downscaled.resize((region_width, region_height), Image.Resampling.NEAREST)
-                
+
                 # Create a blank image of the same size as the original
                 # We'll paste the upscaled sub-region at the correct offset
                 # so we can compare it exactly to the same region in the original.
                 test_image = Image.new(mode=image.mode, size=(width, height))
                 test_image.paste(upscaled, box=(left, top))
-                
+
                 # Compute MSE only within the region_box
-                mse_val = compute_mse_region(image, test_image, region_box)
-                
+                mse_val = utils.compute_mse_region(image, test_image, region_box)
+
                 # Track the best match
                 if mse_val < best_mse_val:
                     best_mse_val = mse_val
                     best_scale = scale
                     best_offset = offset_x, offset_y
                     best_img = downscaled
-    
+
     return best_scale, best_offset, best_mse_val, best_img
 
 def main():
