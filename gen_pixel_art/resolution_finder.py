@@ -2,7 +2,65 @@ from pathlib import Path
 from PIL import Image
 from gen_pixel_art import utils
 
-def estimate_scale_factor_with_offset(image, max_scale=100):
+def estimate_scale_factor(image: Image.Image, max_scale: int=100):
+    """
+    Estimate the best integer scale factor by:
+      1. Downscaling the image with a candidate factor
+      2. Upscaling it back to the original size (via nearest neighbor)
+      3. Measuring reconstruction error (MSE) against the original
+
+    Parameters:
+    -----------
+    image : PIL.Image (RGBA)
+        The noisy, potentially upscaled pixel-art-like image with transparency.
+    max_scale : int
+        The maximum scale factor to try (the minimum is 1).
+
+    Returns:
+    --------
+    best_scale : int
+        The scale factor that yields the best reconstruction.
+    best_mse : float
+        The MSE at the best scale.
+    """
+    width, height = image.size
+
+    best_scale = 1
+    best_mse_val = float('inf')
+    best_img = image
+
+    # Loop over candidate scale factors
+    for scale in range(2, max_scale + 1):
+        if scale > width or scale > height:
+            # No point in going beyond the image's dimensions
+            break
+
+        # Downscaled dimensions
+        down_width  = width  // scale
+        down_height = height // scale
+
+        # Skip invalid factors where integer division yields 0
+        if down_width < 1 or down_height < 1:
+            continue
+
+        # Downscale using BOX (area resampling)
+        downscaled = image.resize((down_width, down_height), Image.Resampling.BOX)
+
+        # Upscale back to the original size using nearest-neighbor
+        upscaled = downscaled.resize((width, height), Image.Resampling.NEAREST)
+
+        # Compute error
+        mse_val = utils.compute_mse(image, upscaled)
+
+        # Track best
+        if mse_val < best_mse_val:
+            best_mse_val = mse_val
+            best_scale = scale
+            best_img = downscaled
+
+    return best_scale, best_mse_val, best_img
+
+def estimate_scale_factor_with_offset(image: Image.Image, max_scale: int=100):
     """
     Estimate the best integer scale factor and (offset_x, offset_y) by:
       1. Cropping a sub-region of the image starting at (offset_x, offset_y)
@@ -77,7 +135,7 @@ def estimate_scale_factor_with_offset(image, max_scale=100):
                 test_image.paste(upscaled, box=(left, top))
 
                 # Compute MSE only within the region_box
-                mse_val = utils.compute_mse_region(image, test_image, region_box)
+                mse_val = utils.compute_mse(image, test_image, region_box)
 
                 # Track the best match
                 if mse_val < best_mse_val:
@@ -92,9 +150,12 @@ def main():
     asset = 'blob.png'
     image_path = Path.cwd() / 'data' / 'creatures' / asset
     img_with_alpha = Image.open(image_path).convert("RGBA")
-    best_scale, (best_ox, best_oy), best_err, best_img = estimate_scale_factor_with_offset(img_with_alpha)
+    #best_scale, (best_ox, best_oy), best_err, best_img = estimate_scale_factor_with_offset(img_with_alpha)
+    cropped_edges = utils.crop_border(img_with_alpha, border=2)
+    cropped_alpha = utils.crop_transparent_edges(cropped_edges)
+    best_scale, best_err, best_img = estimate_scale_factor(cropped_alpha)
     print(f"Best Scale Factor: {best_scale}")
-    print(f"Best Offsets: offset_x={best_ox}, offset_y={best_oy}")
+    #print(f"Best Offsets: offset_x={best_ox}, offset_y={best_oy}")
     print(f"Minimum MSE: {best_err:.2f}")
     output_dir = Path.cwd() / 'output' / 'downscale'
     output_dir.mkdir(exist_ok=True, parents=True)

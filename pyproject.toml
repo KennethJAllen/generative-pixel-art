@@ -1,5 +1,5 @@
 [project]
-name = "generative-pixel-art"
+name = "gen_pixel_art"
 version = "0.1.0"
 description = "Converts text-to-art generated 'pixel' art from LLMs to true resolution pixel art assets."
 readme = "README.md"
@@ -9,3 +9,10 @@ dependencies = [
     "numpy>=2.2.4",
     "pillow>=11.1.0",
 ]
+packages = [
+    { include = "gen_pixel_art" }
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
