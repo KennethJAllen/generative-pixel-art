@@ -40,7 +40,7 @@ def crop_transparent_edges(image: Image.Image, output_path: Path=None):
 
 def crop_white_edges(image: Image.Image, tolerance: int = 10) -> Image.Image:
     """
-    Return `img` cropped so that no pure‑white (255,255,255) border pixels remain.
+    Return `img` cropped so that no pure-white (255,255,255) border pixels remain.
 
     Parameters
     ----------
@@ -48,7 +48,7 @@ def crop_white_edges(image: Image.Image, tolerance: int = 10) -> Image.Image:
         The source image.  Mode is converted to RGB if needed.
     tolerance : int, optional
         Accept any channel value ≥ 255 − tolerance as white.
-        0 keeps only fully‑white pixels; 10 allows light grays, etc.
+        0 keeps only fully-white pixels; 10 allows light grays, etc.
 
     Returns
     -------
@@ -62,7 +62,7 @@ def crop_white_edges(image: Image.Image, tolerance: int = 10) -> Image.Image:
     # Build a white background the same size.
     bg = Image.new("RGB", image.size, (255, 255, 255))
 
-    # Difference highlights every non‑white pixel.
+    # Difference highlights every non-white pixel.
     diff = ImageChops.difference(image, bg)
 
     if tolerance:
@@ -106,3 +106,39 @@ def blur(image: Image.Image) -> Image.Image:
 
 def enhance(image: Image.Image) -> Image.Image:
     return image.filter(ImageFilter.EDGE_ENHANCE)
+
+def fourier_spectrum(image: Image.Image) -> np.ndarray:
+    """
+    Compute the log-magnitude spectrum of an image.
+
+    Parameters
+    ----------
+    path
+        Image file to analyse.
+    save
+        Optional path.  If given, the routine writes an 8-bit PNG of the
+        spectrum to this location.
+
+    Returns
+    -------
+    np.ndarray
+        A 2-D float array in the range [0, 1] that you can pass straight to
+        `plt.imshow`.
+    """
+    # 1. convert to luminance so the FFT runs on one channel.
+    img = image.convert("L")
+
+    # 2. Forward FFT, then move the zero frequency to the centre.
+    fshift = np.fft.fftshift(np.fft.fft2(img))
+
+    # 3. Use log(1 + |F|) to compress the dynamic range for display.
+    magnitude = np.log1p(np.abs(fshift))
+
+    # 4. Scale to [0, 1] for consistent plotting or saving.
+    magnitude -= magnitude.min()
+    magnitude /= magnitude.max()
+
+    mag_image = Image.fromarray((magnitude * 255).astype(np.uint8))
+    mag_image.show()
+
+    return magnitude
