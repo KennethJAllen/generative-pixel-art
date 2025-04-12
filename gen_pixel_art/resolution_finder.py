@@ -157,9 +157,9 @@ def main():
 
     image_cropped_edges = utils.crop_border(image_rbg, border=2)
     fully_cropped_image = utils.crop_white_edges(image_cropped_edges)
-    blurred_image = utils.blur(fully_cropped_image)
 
-    fft = utils.fourier_spectrum(blurred_image)
+    #fft = utils.fourier_spectrum(fully_cropped_image)
+    kx, ky = utils.fundamental_period_fft(fully_cropped_image)
 
     #best_scale, best_err, best_img = estimate_scale_factor(fully_cropped_image)
     best_scale, (best_ox, best_oy), best_err, best_img = estimate_scale_factor_with_offset(blurred_image)

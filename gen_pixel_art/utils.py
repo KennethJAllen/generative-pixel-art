@@ -2,6 +2,7 @@
 from pathlib import Path
 import numpy as np
 from PIL import Image, ImageFilter, ImageChops
+from scipy.signal import find_peaks
 
 def crop_border(image : Image.Image, border: int=1, output_path=None):
     """Crop the boder of an image by a few pixels."""
@@ -142,3 +143,59 @@ def fourier_spectrum(image: Image.Image) -> np.ndarray:
     mag_image.show()
 
     return magnitude
+
+
+
+def fundamental_period_fft(
+    image: Image.Image,
+    thresh_ratio: float = 0.25,
+    ) -> int:
+    """
+    Return (k_x, k_y) — the horizontal and vertical repeat factors.
+    If no clear peak is found in one direction, that value is None.
+    
+    Parameters
+    ----------
+    image         : PIL.Image  (RGBA or RGB or L)
+    thresh_ratio  : float
+        Peaks whose height is at least `thresh_ratio * max_peak`
+        are considered.  Increase if you get spurious peaks,
+        decrease if the true peak is weak.
+    """
+    # 1. luminance
+    g = np.asarray(image.convert("L"), dtype=np.float32)
+    H, W = g.shape
+
+    # 2‑D FFT → magnitude spectrum
+    F = np.fft.fftshift(np.fft.fft2(g - g.mean()))
+    mag = np.abs(F)
+
+    # 2. Collapse to 1‑D spectra along each axis
+    col_profile = mag.sum(axis=0)          # horizontal freq content (x peaks)
+    row_profile = mag.sum(axis=1)          # vertical   freq content (y peaks)
+
+    # 3. zero‑out a small DC neighbourhood so it never wins
+    pad = 3
+    centre_x = W // 2
+    centre_y = H // 2
+    col_profile[centre_x - pad : centre_x + pad + 1] = 0
+    row_profile[centre_y - pad : centre_y + pad + 1] = 0
+
+    # 4. keep only the positive‑frequency half (right / bottom side)
+    col_half = col_profile[centre_x + 1 :]
+    row_half = row_profile[centre_y + 1 :]
+
+    # 5. peak picking
+    def first_peak(arr, min_height):
+        peaks, props = find_peaks(arr, height=min_height)
+        return peaks[0] if len(peaks) else None
+
+    cx_peak = first_peak(col_half, col_half.max() * thresh_ratio)
+    cy_peak = first_peak(row_half, row_half.max() * thresh_ratio)
+
+    kx = int(round(W / (2 * cx_peak))) if cx_peak is not None and cx_peak > 0 else None
+    ky = int(round(H / (2 * cy_peak))) if cy_peak is not None and cy_peak > 0 else None
+
+    # Assume the image is square scaled
+    k = round((kx + ky)/2)
+    return k
