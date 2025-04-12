@@ -1,7 +1,7 @@
 """Utility functions for generative pixel art."""
 from pathlib import Path
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageChops
 
 def crop_border(image : Image.Image, border: int=1, output_path=None):
     """Crop the boder of an image by a few pixels."""
@@ -38,7 +38,43 @@ def crop_transparent_edges(image: Image.Image, output_path: Path=None):
         cropped_image.save(output_path)
     return cropped_image
 
-def compute_mse(full_image: Image.Image, test_image: Image.Image, region_box: tuple[int] = None):
+def crop_white_edges(image: Image.Image, tolerance: int = 10) -> Image.Image:
+    """
+    Return `img` cropped so that no pure‑white (255,255,255) border pixels remain.
+
+    Parameters
+    ----------
+    img : PIL.Image
+        The source image.  Mode is converted to RGB if needed.
+    tolerance : int, optional
+        Accept any channel value ≥ 255 − tolerance as white.
+        0 keeps only fully‑white pixels; 10 allows light grays, etc.
+
+    Returns
+    -------
+    PIL.Image
+        Cropped image.  If the whole image is white, returns the original.
+    """
+    # Ensure three channels for a clean comparison.
+    if image.mode != "RGB":
+        image = image.convert("RGB")
+
+    # Build a white background the same size.
+    bg = Image.new("RGB", image.size, (255, 255, 255))
+
+    # Difference highlights every non‑white pixel.
+    diff = ImageChops.difference(image, bg)
+
+    if tolerance:
+        # Shift the difference image down so that “almost white”
+        # pixels also become zero.
+        diff = ImageChops.add(diff, diff, scale=1.0, offset=-tolerance)
+
+    bbox = diff.getbbox()
+    cropped_image = image.crop(bbox)
+    return cropped_image
+
+def compute_mse(image1: Image.Image, image2: Image.Image, region_box: tuple[int] = None):
     """
     Compute MSE between the sub-region of 'full_image' and 'test_image'
     over the same bounding box (region_box = (left, top, right, bottom)).
@@ -47,18 +83,18 @@ def compute_mse(full_image: Image.Image, test_image: Image.Image, region_box: tu
     """
     # Crop the relevant region
     if region_box is not None:
-        region_full = full_image.crop(region_box)
-        region_test = test_image.crop(region_box)
+        region_full = image1.crop(region_box)
+        region_test = image2.crop(region_box)
     else:
-        region_full = full_image
-        region_test = test_image
+        region_full = image1
+        region_test = image2
 
     arr_full = np.asarray(region_full, dtype=np.float32)
     arr_test = np.asarray(region_test, dtype=np.float32)
 
     # Ensure shapes match
     if arr_full.shape != arr_test.shape:
-        return np.inf
+        raise ValueError("Shapes do not match.")
 
     return np.mean((arr_full - arr_test) ** 2)
 

@@ -5,7 +5,7 @@ from PIL import Image, ImageFilter, ImageChops
 import matplotlib.pyplot as plt
 from gen_pixel_art import utils
 
-INPUT_DIR = Path(__file__).resolve().parent.parent / 'data' / 'input'
+INPUT_DIR = Path(__file__).resolve().parent.parent / 'data'
 MAX_PIXEL = 255
 
 def read_images() -> list[Image.Image]:
@@ -16,31 +16,6 @@ def read_images() -> list[Image.Image]:
         image = Image.open(image_file)
         images.append(image)
     return images
-
-def concatenate_images(images: list[Image.Image]) -> Image.Image:
-    """Concatenates images side by side for comparison."""
-    # Concatenated image dimensions
-    total_width = 0
-    max_height = 0
-    for image in images:
-        image_width, image_height = image.size
-        total_width += image_width
-        max_height = max(max_height, image_height)
-
-    # Create new image and insert images
-    concatenated_image = Image.new('RGB', (total_width, max_height))
-    accumulated_width = 0
-    for image in images:
-        image_width, _ = image.size
-        concatenated_image.paste(image, (accumulated_width, 0))
-        accumulated_width += image_width
-    return concatenated_image
-
-def downscale(image: Image.Image, scale_factor: float = 10) -> Image.Image:
-    """Downscale an image such that it is scale_factor times smaller than the original."""
-    width, height = image.size
-    downscaled_image = image.resize((width // scale_factor, height // scale_factor), Image.Resampling.LANCZOS)
-    return downscaled_image
 
 def get_pixel_conversion(image: Image.Image) -> int:
     """Outputs the number of true pixels per image pixel in the high resolution pixel art image."""
