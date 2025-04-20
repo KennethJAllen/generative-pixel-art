@@ -150,19 +150,26 @@ def main():
     asset = 'blob.png'
     image_path = Path.cwd() / 'data' / 'creatures' / asset
     image_with_alpha = Image.open(image_path).convert("RGBA")
+    # Turn all semi-transparent pixels fully transparent
+    completed_image_with_alpha = utils.complete_alpha(image_with_alpha)
+    #completed_image_with_alpha.show()
 
+    # dilate the alpha, sometimes chatgpt leaves pixel without alpha
+    dilated_img_with_alpha = utils.dialate_alpha(completed_image_with_alpha)
     # Start with a solid‑white background, then paint the image on top.
     white_bg = Image.new("RGBA", image_with_alpha.size, (255, 255, 255, 255))
-    image_rbg = Image.alpha_composite(white_bg, image_with_alpha).convert("RGB")
+    black_bg = Image.new("RGBA", image_with_alpha.size, (0,0,0,0))
+    # Turn transparent background black
+    image_rbg = Image.alpha_composite(black_bg, dilated_img_with_alpha).convert("RGB")
 
     image_cropped_edges = utils.crop_border(image_rbg, border=2)
     fully_cropped_image = utils.crop_white_edges(image_cropped_edges)
 
     #fft = utils.fourier_spectrum(fully_cropped_image)
-    kx, ky = utils.fundamental_period_fft(fully_cropped_image)
+    k = utils.fundamental_period_fft(fully_cropped_image)
 
     #best_scale, best_err, best_img = estimate_scale_factor(fully_cropped_image)
-    best_scale, (best_ox, best_oy), best_err, best_img = estimate_scale_factor_with_offset(blurred_image)
+    best_scale, (best_ox, best_oy), best_err, best_img = estimate_scale_factor_with_offset(fully_cropped_image)
     print(f"Best Scale Factor: {best_scale}")
     print(f"Best Offsets: offset_x={best_ox}, offset_y={best_oy}")
     print(f"Minimum MSE: {best_err:.2f}")

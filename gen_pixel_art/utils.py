@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageFilter, ImageChops
 from scipy.signal import find_peaks
+from scipy.ndimage import binary_dilation
 
 def crop_border(image : Image.Image, border: int=1, output_path=None):
     """Crop the boder of an image by a few pixels."""
@@ -75,7 +76,57 @@ def crop_white_edges(image: Image.Image, tolerance: int = 10) -> Image.Image:
     cropped_image = image.crop(bbox)
     return cropped_image
 
-def compute_mse(image1: Image.Image, image2: Image.Image, region_box: tuple[int] = None):
+def complete_alpha(image: Image.Image, threshold: int = 255) -> Image.Image:
+    """
+    Turns pixels with transparency less than the threhold fully transparent.
+    Pixels with transparency higher than threshold are turned opaque.
+    """
+    # Convert the image to a NumPy array
+    data = np.array(image)
+
+    # Extract the alpha channel (last channel)
+    alpha = data[..., 3]
+
+    # Create a mask for semi-transparent pixels.
+    # Here we define semi-transparent as any pixel that is not fully opaque (alpha != 255)
+    # If you want to treat fully transparent pixels (alpha == 0) differently, you can adjust the condition.
+    semi_transparent_mask = (alpha > 0) & (alpha < threshold)
+
+    # Set all semi-transparent pixels to fully transparent
+    data[..., 3][semi_transparent_mask] = 0
+    data[..., 3][~semi_transparent_mask] = 255
+
+    # Create a new image from the modified array and save it
+    result = Image.fromarray(data).convert("RGBA")
+    return result
+
+def dialate_alpha(image: Image.Image) -> Image.Image:
+    """
+    Dilates the alpha of an image.
+    If a pixel is adjacent to a pixel with alpha, that pixel will be given alpha as well.
+    """
+    # Convert image to a NumPy array
+    data = np.array(image)
+
+    # Extract the alpha channel
+    alpha = data[..., 3]
+
+    # Create a binary mask for fully transparent pixels
+    # (change the condition if you need to treat partially transparent values differently)
+    transparent_mask = (alpha == 0)
+
+    # Apply binary dilation to the mask.
+    # The structure (a 3x3 array of ones) ensures 8-connected neighbor checking.
+    dilated_mask = binary_dilation(transparent_mask, structure=np.ones((3, 3)))
+
+    # Set the alpha of all dilated pixels to 0 (fully transparent)
+    data[..., 3][dilated_mask] = 0
+
+    # Create a new image from the modified array
+    result_image = Image.fromarray(data)
+    return result_image
+
+def compute_mse(image1: Image.Image, image2: Image.Image, region_box: tuple[int] = None) -> float:
     """
     Compute MSE between the sub-region of 'full_image' and 'test_image'
     over the same bounding box (region_box = (left, top, right, bottom)).
@@ -146,10 +197,7 @@ def fourier_spectrum(image: Image.Image) -> np.ndarray:
 
 
 
-def fundamental_period_fft(
-    image: Image.Image,
-    thresh_ratio: float = 0.25,
-    ) -> int:
+def fundamental_period_fft(image: Image.Image, thresh_ratio: float = 0.25) -> int:
     """
     Return (k_x, k_y) — the horizontal and vertical repeat factors.
     If no clear peak is found in one direction, that value is None.
@@ -164,7 +212,7 @@ def fundamental_period_fft(
     """
     # 1. luminance
     g = np.asarray(image.convert("L"), dtype=np.float32)
-    H, W = g.shape
+    height, width = g.shape
 
     # 2‑D FFT → magnitude spectrum
     F = np.fft.fftshift(np.fft.fft2(g - g.mean()))
@@ -176,8 +224,8 @@ def fundamental_period_fft(
 
     # 3. zero‑out a small DC neighbourhood so it never wins
     pad = 3
-    centre_x = W // 2
-    centre_y = H // 2
+    centre_x = width // 2
+    centre_y = height // 2
     col_profile[centre_x - pad : centre_x + pad + 1] = 0
     row_profile[centre_y - pad : centre_y + pad + 1] = 0
 
@@ -193,8 +241,8 @@ def fundamental_period_fft(
     cx_peak = first_peak(col_half, col_half.max() * thresh_ratio)
     cy_peak = first_peak(row_half, row_half.max() * thresh_ratio)
 
-    kx = int(round(W / (2 * cx_peak))) if cx_peak is not None and cx_peak > 0 else None
-    ky = int(round(H / (2 * cy_peak))) if cy_peak is not None and cy_peak > 0 else None
+    kx = int(round(width / (2 * cx_peak))) if cx_peak is not None and cx_peak > 0 else None
+    ky = int(round(height / (2 * cy_peak))) if cy_peak is not None and cy_peak > 0 else None
 
     # Assume the image is square scaled
     k = round((kx + ky)/2)
