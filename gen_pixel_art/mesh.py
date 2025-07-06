@@ -84,7 +84,7 @@ def get_pixel_width(lines_x: list[int], lines_y: list[int], trim_outlier_fractio
 
     return np.median(middle)
 
-def complete_grid(lines: list[int], pixel_width: int) -> list[int]:
+def complete_mesh(lines: list[int], pixel_width: int) -> list[int]:
     """
     Given sorted line coords and pixel width,
     further partition those line coordinates to approximately even spacing.
@@ -145,6 +145,11 @@ def compute_gridlines(img_path: Path,
                       save_images: bool = True) -> tuple[list[int]]:
     """
     Finds grid lines of a high resolution noisy image.
+    - Uses Canny edge detector to find vertical and horizontal edges
+    - Closes small gets between edges with morphological closing
+    - Uses Hough transform to detect pixel edge lines
+    - Finds true width of pixels from line differences
+    - Completes mesh by filling in gaps between identified lines
     inputs:
         img_path: Path to image
         canny_thresholds: thresholds 1 and 2 for canny edge detection algorithm
@@ -152,7 +157,9 @@ def compute_gridlines(img_path: Path,
 
     """
     img = Image.open(img_path).convert("RGBA")
-    cropped_img = utils.crop_border(img, num_pixels=1)
+
+    # Crop border and zero out mostly transparent pixels from alpha
+    cropped_img = utils.crop_border(img, num_pixels=2)
     grey_img = utils.rgba_to_masked_grayscale(cropped_img)
 
     # Find edges using Canny edge detection
@@ -168,8 +175,8 @@ def compute_gridlines(img_path: Path,
     pixel_width = get_pixel_width(lines_x, lines_y)
 
     # Fill in the gaps between the lines to complete the grid
-    lines_x_complete = complete_grid(lines_x, pixel_width)
-    lines_y_complete = complete_grid(lines_y, pixel_width)
+    mesh_x = complete_mesh(lines_x, pixel_width)
+    mesh_y = complete_mesh(lines_y, pixel_width)
 
     if save_images:
         output_dir = Path.cwd() / "output" / img_path.stem
@@ -182,10 +189,10 @@ def compute_gridlines(img_path: Path,
 
         img_with_lines = overlay_grid_lines(img, lines_x, lines_y)
         img_with_lines.save(output_dir / "lines.png")
-        img_with_completed_lines = overlay_grid_lines(img, lines_x_complete, lines_y_complete)
-        img_with_completed_lines.save(output_dir / "grid.png")
+        img_with_completed_lines = overlay_grid_lines(img, mesh_x, mesh_y)
+        img_with_completed_lines.save(output_dir / "mesh.png")
 
-    return lines_x_complete, lines_y_complete
+    return mesh_x, mesh_y
 
 def main():
     img_path = Path.cwd() / "data" / "objects" / "treasure.png"
