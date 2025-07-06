@@ -1,5 +1,5 @@
 """Utility functions for generative pixel art."""
-from PIL import Image
+from PIL import Image, ImageDraw
 import numpy as np
 
 def crop_border(image : Image.Image, num_pixels: int=1) -> Image.Image:
@@ -26,3 +26,35 @@ def rgba_to_masked_grayscale(image: Image.Image, opacity_threshold: int = 128) -
 
     greyscale = Image.fromarray(luma, mode="L")
     return greyscale
+
+def overlay_grid_lines(
+        image: Image.Image,
+        lines_x: list[int],
+        lines_y: list[int],
+        line_color: tuple[int, int, int] = (255, 0, 0),
+        line_width: int = 1
+        ) -> Image.Image:
+    """
+    Overlay vertical and horizontal grid lines over image for visualization.
+
+    inputs:
+        image: The source PIL image (RGBA or RGB).
+        lines_x: Sorted x-coordinates of vertical grid lines.
+        lines_y: Sorted y-coordinates of horizontal grid lines.
+        line_color: RGB tuple for the line color (default red).
+        line_width: Width of the drawn lines in pixels.
+    """
+    # Ensure we draw on an RGBA canvas
+    canvas = image.convert("RGBA")
+    draw = ImageDraw.Draw(canvas)
+
+    w, h = canvas.size
+    # Draw each vertical line
+    for x in lines_x:
+        draw.line([(x, 0), (x, h)], fill=(*line_color, 255), width=line_width)
+
+    # Draw each horizontal line
+    for y in lines_y:
+        draw.line([(0, y), (w, y)], fill=(*line_color, 255), width=line_width)
+
+    return canvas

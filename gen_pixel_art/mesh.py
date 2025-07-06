@@ -1,5 +1,5 @@
 from pathlib import Path
-from PIL import Image, ImageDraw
+from PIL import Image
 import numpy as np
 import cv2
 from gen_pixel_art import utils
@@ -84,7 +84,7 @@ def get_pixel_width(lines_x: list[int], lines_y: list[int], trim_outlier_fractio
 
     return np.median(middle)
 
-def complete_mesh(lines: list[int], pixel_width: int) -> list[int]:
+def homogenize_lines(lines: list[int], pixel_width: int) -> list[int]:
     """
     Given sorted line coords and pixel width,
     further partition those line coordinates to approximately even spacing.
@@ -107,42 +107,10 @@ def complete_mesh(lines: list[int], pixel_width: int) -> list[int]:
 
     return complete_lines
 
-def overlay_grid_lines(
-        image: Image.Image,
-        lines_x: list[int],
-        lines_y: list[int],
-        line_color: tuple[int, int, int] = (255, 0, 0),
-        line_width: int = 1
-        ) -> Image.Image:
-    """
-    Overlay vertical and horizontal grid lines over image for visualization.
-
-    inputs:
-        image: The source PIL image (RGBA or RGB).
-        lines_x: Sorted x-coordinates of vertical grid lines.
-        lines_y: Sorted y-coordinates of horizontal grid lines.
-        line_color: RGB tuple for the line color (default red).
-        line_width: Width of the drawn lines in pixels.
-    """
-    # Ensure we draw on an RGBA canvas
-    canvas = image.convert("RGBA")
-    draw = ImageDraw.Draw(canvas)
-
-    w, h = canvas.size
-    # Draw each vertical line
-    for x in lines_x:
-        draw.line([(x, 0), (x, h)], fill=(*line_color, 255), width=line_width)
-
-    # Draw each horizontal line
-    for y in lines_y:
-        draw.line([(0, y), (w, y)], fill=(*line_color, 255), width=line_width)
-
-    return canvas
-
-def compute_gridlines(img_path: Path,
-                      canny_thresholds: tuple[int] = (50, 200),
-                      closure_kernel_size: int = 10,
-                      save_images: bool = True) -> tuple[list[int]]:
+def compute_mesh(img: Image.Image,
+                 canny_thresholds: tuple[int] = (50, 200),
+                 closure_kernel_size: int = 10,
+                 output_dir: Path | None = None) -> tuple[list[int]]:
     """
     Finds grid lines of a high resolution noisy image.
     - Uses Canny edge detector to find vertical and horizontal edges
@@ -156,8 +124,6 @@ def compute_gridlines(img_path: Path,
         morphological_closure_kernel_size: Kernel size for the morphological closure
 
     """
-    img = Image.open(img_path).convert("RGBA")
-
     # Crop border and zero out mostly transparent pixels from alpha
     cropped_img = utils.crop_border(img, num_pixels=2)
     grey_img = utils.rgba_to_masked_grayscale(cropped_img)
@@ -175,28 +141,25 @@ def compute_gridlines(img_path: Path,
     pixel_width = get_pixel_width(lines_x, lines_y)
 
     # Fill in the gaps between the lines to complete the grid
-    mesh_x = complete_mesh(lines_x, pixel_width)
-    mesh_y = complete_mesh(lines_y, pixel_width)
+    mesh_x = homogenize_lines(lines_x, pixel_width)
+    mesh_y = homogenize_lines(lines_y, pixel_width)
 
-    if save_images:
-        output_dir = Path.cwd() / "output" / img_path.stem
-        output_dir.mkdir(exist_ok=True, parents=True)
-
+    if output_dir is not None:
         edges_img = Image.fromarray(edges, mode="L")
         edges_img.save(output_dir / "edges.png")
         closed_edges_img = Image.fromarray(closed_edges, mode="L")
         closed_edges_img.save(output_dir / "closed_edges.png")
 
-        img_with_lines = overlay_grid_lines(img, lines_x, lines_y)
+        img_with_lines = utils.overlay_grid_lines(img, lines_x, lines_y)
         img_with_lines.save(output_dir / "lines.png")
-        img_with_completed_lines = overlay_grid_lines(img, mesh_x, mesh_y)
+        img_with_completed_lines = utils.overlay_grid_lines(img, mesh_x, mesh_y)
         img_with_completed_lines.save(output_dir / "mesh.png")
 
     return mesh_x, mesh_y
 
 def main():
     img_path = Path.cwd() / "data" / "objects" / "treasure.png"
-    grid_lines = compute_gridlines(img_path)
+    grid_lines = compute_mesh(img_path)
     print(grid_lines)
 
 if __name__ == "__main__":
