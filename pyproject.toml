@@ -5,10 +5,9 @@ description = "Converts text-to-art generated 'pixel' art from LLMs to true reso
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "matplotlib>=3.10.1",
     "numpy>=2.2.4",
+    "opencv-python>=4.11.0.86",
     "pillow>=11.1.0",
-    "scipy>=1.15.2",
 ]
 packages = [
     { include = "gen_pixel_art" }
@@ -17,3 +16,9 @@ packages = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+    "pylint>=3.3.7",
+]
