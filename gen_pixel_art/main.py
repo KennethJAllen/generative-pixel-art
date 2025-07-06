@@ -22,16 +22,27 @@ def downsample(image: Image.Image, mesh: tuple[list[int], list[int]]) -> Image.I
     return Image.fromarray(out, mode="RGB")
 
 def main():
-    img_path = Path.cwd() / "data" / "objects" / "treasure.png"
-    output_dir = Path.cwd() / "output" / img_path.stem
-    output_dir.mkdir(exist_ok=True, parents=True)
+    data_dir = Path.cwd() / "data"
+    img_paths = [
+        data_dir / "characters" / "warrior.png",
+        data_dir / "characters" / "werewolf.png",
+        data_dir / "creatures" / "blob.png",
+        data_dir / "creatures" / "bat.png",
+        data_dir / "objects" / "treasure.png",
+        data_dir / "objects" / "gemstone.png",
+        data_dir / "tiles" / "grass.png",
+        data_dir / "tiles" / "stone.png",
+        ]
+    for img_path in img_paths:
+        output_dir = Path.cwd() / "output" / img_path.stem
+        output_dir.mkdir(exist_ok=True, parents=True)
 
-    img = Image.open(img_path).convert("RGBA")
-    img_mesh = mesh.compute_mesh(img, output_dir=output_dir)
-    # TODO: automatically detect the number of colors needed
-    paletted_img = colors.palette_img(img, num_colors = 24)
-    pixelated_img = downsample(paletted_img, img_mesh)
-    pixelated_img.save(output_dir / "pixelated.png")
+        img = Image.open(img_path).convert("RGBA")
+        img_mesh = mesh.compute_mesh(img, output_dir=output_dir)
+        # TODO: automatically detect the number of colors needed
+        paletted_img = colors.palette_img(img, num_colors = 24)
+        pixelated_img = downsample(paletted_img, img_mesh)
+        pixelated_img.save(output_dir / "pixelated.png")
 
 if __name__ == "__main__":
     main()
