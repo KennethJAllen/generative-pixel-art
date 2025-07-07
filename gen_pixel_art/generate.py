@@ -21,7 +21,7 @@ def generate_pixel_art(img_path: Path, output_dir: Path, num_colors: int = 16, s
 def main():
     data_dir = Path.cwd() / "data"
 
-    num_colors = 16
+    num_colors = 24
 
     img_paths = [
         data_dir / "characters" / "warrior.png",
