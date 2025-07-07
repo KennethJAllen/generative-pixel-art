@@ -39,7 +39,7 @@ The main algorithm solves these challenges. Here is a high level overview of the
 
 ![edges](./data/creatures/blob.png)
 
-1) Trim the edges of the image and zero out pixels with more than %50 alpha.
+1) Trim the edges of the image and zero out pixels with more than 50% alpha.
     - This is to work around some issues with models such as GPT-4o not giving a perfectly transparent background.
 
 2) Find edges of the pixel art using [Canny edge detection](https://docs.opencv.org/3.4/da/d22/tutorial_py_canny.html).
