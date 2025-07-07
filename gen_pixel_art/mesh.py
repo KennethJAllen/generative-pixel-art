@@ -159,7 +159,8 @@ def compute_mesh(img: Image.Image,
 
 def main():
     img_path = Path.cwd() / "data" / "objects" / "treasure.png"
-    grid_lines = compute_mesh(img_path)
+    img = Image.open(img_path).convert("RGBA")
+    grid_lines = compute_mesh(img)
     print(grid_lines)
 
 if __name__ == "__main__":

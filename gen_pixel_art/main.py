@@ -1,25 +1,6 @@
 from pathlib import Path
 from PIL import Image
-import numpy as np
-from gen_pixel_art import colors
-from gen_pixel_art import mesh
-
-def downsample(image: Image.Image, mesh: tuple[list[int], list[int]]) -> Image.Image:
-    lines_x, lines_y = mesh
-    rgba = image.convert("RGBA")
-    # reuse your global-quantized RGB version here:
-    rgb = np.array(rgba)[:, :, :3]
-    h_new, w_new = len(lines_y) - 1, len(lines_x) - 1
-    out = np.zeros((h_new, w_new, 3), dtype=np.uint8)
-
-    for j in range(h_new):
-        for i in range(w_new):
-            x0, x1 = lines_x[i], lines_x[i+1]
-            y0, y1 = lines_y[j], lines_y[j+1]
-            cell = rgb[y0:y1, x0:x1]
-            out[j, i] = colors.get_cell_color(cell)
-
-    return Image.fromarray(out, mode="RGB")
+from gen_pixel_art import colors, mesh, utils
 
 def main():
     data_dir = Path.cwd() / "data"
@@ -32,6 +13,10 @@ def main():
         data_dir / "objects" / "gemstone.png",
         data_dir / "tiles" / "grass.png",
         data_dir / "tiles" / "stone.png",
+        data_dir / "game" / "bowser.jpg",
+        data_dir / "large" / "demon.png",
+        data_dir / "large" / "angel.png",
+        data_dir / "game" / "ash.png",
         ]
     for img_path in img_paths:
         output_dir = Path.cwd() / "output" / img_path.stem
@@ -39,10 +24,15 @@ def main():
 
         img = Image.open(img_path).convert("RGBA")
         img_mesh = mesh.compute_mesh(img, output_dir=output_dir)
-        # TODO: automatically detect the number of colors needed
-        paletted_img = colors.palette_img(img, num_colors = 24)
-        pixelated_img = downsample(paletted_img, img_mesh)
-        pixelated_img.save(output_dir / "pixelated.png")
+
+        #paletted_img = colors.palette_img(img, num_colors = 16)
+        paletted_img = colors.auto_quantize(img)
+        pixelated_img = colors.downsample(paletted_img, img_mesh)
+        pixelated_img.save(output_dir / "result.png")
+
+        # Upscale true pixelated image for deomonstation purposes
+        upscaled_img = utils.upscale(pixelated_img)
+        upscaled_img.save(output_dir / "upscaled.png")
 
 if __name__ == "__main__":
     main()

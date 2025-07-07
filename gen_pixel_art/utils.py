@@ -58,3 +58,10 @@ def overlay_grid_lines(
         draw.line([(0, y), (w, y)], fill=(*line_color, 255), width=line_width)
 
     return canvas
+
+def upscale(img: Image.Image, scale: int = 20) -> Image.Image:
+    w, h = img.size
+    w_new, h_new = w * scale, h * scale
+    new_size = w_new, h_new
+    upscaled_img = img.resize(new_size, resample=Image.NEAREST)
+    return upscaled_img

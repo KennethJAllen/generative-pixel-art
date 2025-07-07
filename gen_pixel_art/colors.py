@@ -26,7 +26,7 @@ def get_cell_color(cell_pixels: np.ndarray) -> tuple[int,int,int]:
     cell_pixels: shape (H_cell, W_cell, 3), dtype=uint8
     returns the most frequent RGB tuple in that block
     """
-    # flatten to list of tuples
+    # flatten to tuple of pixel values
     flat = list(map(tuple, cell_pixels.reshape(-1, 3)))
     return Counter(flat).most_common(1)[0][0]
 
@@ -34,6 +34,23 @@ def palette_img(img: Image.Image, num_colors: int = 24, quantize_method: int = 1
     rbg_img = rgba_to_masked_rgb(img)
     paletted = rbg_img.quantize(colors=num_colors, method=quantize_method)
     return paletted
+
+def downsample(image: Image.Image, mesh: tuple[list[int], list[int]]) -> Image.Image:
+    lines_x, lines_y = mesh
+    rgba = image.convert("RGBA")
+    # reuse your global-quantized RGB version here:
+    rgb = np.array(rgba)[:, :, :3]
+    h_new, w_new = len(lines_y) - 1, len(lines_x) - 1
+    out = np.zeros((h_new, w_new, 3), dtype=np.uint8)
+
+    for j in range(h_new):
+        for i in range(w_new):
+            x0, x1 = lines_x[i], lines_x[i+1]
+            y0, y1 = lines_y[j], lines_y[j+1]
+            cell = rgb[y0:y1, x0:x1]
+            out[j, i] = get_cell_color(cell)
+
+    return Image.fromarray(out, mode="RGB")
 
 def main():
     img_path = Path.cwd() / "data" / "objects" / "treasure.png"
