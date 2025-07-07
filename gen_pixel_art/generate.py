@@ -34,8 +34,8 @@ def main():
         data_dir / "tiles" / "stone.png",
         data_dir / "game" / "bowser.jpg",
         data_dir / "large" / "demon.png",
-        data_dir / "large" / "angel.png",
         data_dir / "game" / "ash.png",
+        data_dir / "game" / "pumpkin.png",
         ]
 
     for img_path in img_paths:

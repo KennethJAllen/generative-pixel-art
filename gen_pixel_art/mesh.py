@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 from gen_pixel_art import utils
 
-def close_edges(edges: np.ndarray, kernel_size: int = 3) -> np.ndarray:
+def close_edges(edges: np.ndarray, kernel_size: int = 10) -> np.ndarray:
     """
     Apply a morphological closing to fill small gaps in edge map.
     """
