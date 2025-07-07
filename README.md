@@ -28,7 +28,7 @@ cd generative-pixel-art
 python gen_pixel_art/cli.py -i <path/to/img> -c <num colors> -o <output/directory>
 ```
 ## Challenges
-There are many challenges involved in solving this problem. If an LLM is prompted for a pixel art image, the result is a noisy, upscaled image with a non-uniform grid and random artifacts. Due to these issues, standard downsampling techniques do not work. How can we recover the pixel art with "true" resolution and colors?
+There are many challenges involved in solving this problem. If an LLM is prompted for a pixel art image, the result is a noisy, high resolution image with a non-uniform grid and random artifacts. Due to these issues, standard downsampling techniques do not work. How can we recover the pixel art with "true" resolution and colors?
 
 The current approach to turning pixel art into useable assets for games are either
 1) Use naive downsampling which does not give a result that is faithful to the original image.
