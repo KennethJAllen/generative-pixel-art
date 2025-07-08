@@ -58,7 +58,7 @@ The current approach to turning pixel art into useable assets for games are eith
 
 <img src="./assets/blob/lines.png" width="800" alt="lines"/>
 
-5) Find the grid spacing by filtering outliers and taking the median, then complete the grid.
+5) Find the grid spacing by filtering outliers and taking the median of the spacings, then complete the mesh.
 
 <img src="./assets/blob/mesh.png" width="800" alt="mesh"/>
 
