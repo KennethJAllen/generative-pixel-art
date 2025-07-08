@@ -1,3 +1,4 @@
+"""Command line interface"""
 import argparse
 from pathlib import Path
 from gen_pixel_art import generate
@@ -29,8 +30,8 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-            "-s", "--save-steps",
-            dest="save_steps",
+            "-p", "--pixel-size",
+            dest="pixel_size",
             action="store_true",
             help="Save intermediate images (quantized and pixelated) in the output directory."
         )
@@ -42,7 +43,7 @@ def main() -> None:
     generate.generate_pixel_art(args.image_path,
                                 args.output_path,
                                 args.num_colors,
-                                save_intermediate=args.save_steps)
+                                pixel_size=args.pixel_size)
 
 if __name__ == "__main__":
     main()

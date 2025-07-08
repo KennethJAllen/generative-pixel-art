@@ -109,7 +109,7 @@ def homogenize_lines(lines: list[int], pixel_width: int) -> list[int]:
 
 def compute_mesh(img: Image.Image,
                  canny_thresholds: tuple[int] = (50, 200),
-                 closure_kernel_size: int = 10,
+                 closure_kernel_size: int = 8,
                  output_dir: Path | None = None) -> tuple[list[int]]:
     """
     Finds grid lines of a high resolution noisy image.

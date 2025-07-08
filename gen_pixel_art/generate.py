@@ -2,49 +2,66 @@ from pathlib import Path
 from PIL import Image
 from gen_pixel_art import colors, mesh, utils
 
-def generate_pixel_art(img_path: Path, output_dir: Path, num_colors: int = 16, save_intermediate: bool = True) -> None:
-        img = Image.open(img_path).convert("RGBA")
-        if save_intermediate:
-            img_mesh = mesh.compute_mesh(img, output_dir=output_dir)
-        else:
-            img_mesh = mesh.compute_mesh(img, output_dir=None)
+def generate_pixel_art(img_path: Path, output_dir: Path, num_colors: int = 24, pixel_size: int = 20) -> None:
+    """
+    Computes the true resolution pixel art image.
+    inputs:
+    - img_path:
+        path of image to compute true resolution art
+    - output_dir:
+        output directory
+    - num_colors:
+        The number of colors to use when quantizing the image.
+        This is an important parameter to tune,
+        if it is too high, pixels that should be the same color will be different colors
+        if it is too low, pixels that should be different colors will be the same color
+    - pixel_size:
+        Size of pixels to upscale result to after algorithm is complete
+    """
+    img = Image.open(img_path).convert("RGBA")
 
+    # Try to upsample first.
+    upsampled_img = utils.scale_img(img, 2)
+    img_mesh = mesh.compute_mesh(upsampled_img, output_dir=output_dir)
+
+    if len(img_mesh[0]) == 2 or len(img_mesh[1]) == 2:
+        # If no mesh is found, then use the original image instead.
+        img_mesh = mesh.compute_mesh(img, output_dir=output_dir)
         paletted_img = colors.palette_img(img, num_colors=num_colors)
-        pixelated_img = colors.downsample(paletted_img, img_mesh)
-        pixelated_img.save(output_dir / "result.png")
+    else:
+        paletted_img = colors.palette_img(upsampled_img, num_colors=num_colors)
 
-        if save_intermediate:
-            # Upscale true pixelated image for deomonstation purposes
-            upscaled_img = utils.upscale(pixelated_img)
-            upscaled_img.save(output_dir / "upscaled.png")
+    result = colors.downsample(paletted_img, img_mesh)
+    upsampled_result = utils.scale_img(result, pixel_size)
+
+    result.save(output_dir / "result.png")
+    upsampled_result.save(output_dir / "upsampled.png")
 
 def main():
     data_dir = Path.cwd() / "data"
 
-    num_colors = 24
+    img_paths_and_colors = [
+         (data_dir / "characters" / "warrior.png", 32),
+         (data_dir / "characters" / "werewolf.png", 24),
+         (data_dir / "creatures" / "blob.png", 16),
+         (data_dir / "creatures" / "bat.png", 16),
+         (data_dir / "objects" / "treasure.png", 16),
+         (data_dir / "objects" / "gemstone.png", 24),
+         (data_dir / "tiles" / "grass.png", 16),
+         (data_dir / "tiles" / "stone.png", 16),
+         (data_dir / "large" / "demon.png", 64),
+         (data_dir / "game" / "ash.png", 16),
+         (data_dir / "game" / "pumpkin.png", 32),
+         (data_dir / "real" / "gnocchi.png", 32),
+         (data_dir / "real" / "mountain.png", 64),
+         ]
 
-    img_paths = [
-        data_dir / "characters" / "warrior.png",
-        data_dir / "characters" / "werewolf.png",
-        data_dir / "creatures" / "blob.png",
-        data_dir / "creatures" / "bat.png",
-        data_dir / "objects" / "treasure.png",
-        data_dir / "objects" / "gemstone.png",
-        data_dir / "tiles" / "grass.png",
-        data_dir / "tiles" / "stone.png",
-        data_dir / "game" / "bowser.jpg",
-        data_dir / "large" / "demon.png",
-        data_dir / "game" / "ash.png",
-        data_dir / "game" / "pumpkin.png",
-        ]
-
-    for img_path in img_paths:
+    for img_path, num_colors in img_paths_and_colors:
         output_dir = Path.cwd() / "output" / img_path.stem
         output_dir.mkdir(exist_ok=True, parents=True)
         generate_pixel_art(img_path,
                            output_dir,
-                           num_colors=num_colors,
-                           save_intermediate=True)
+                           num_colors=num_colors)
 
 if __name__ == "__main__":
     main()
