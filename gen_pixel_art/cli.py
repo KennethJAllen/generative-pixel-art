@@ -28,13 +28,13 @@ def parse_args() -> argparse.Namespace:
         required=True,
         help="Path where the pixelated image will be saved."
     )
-
     parser.add_argument(
-            "-p", "--pixel-size",
-            dest="pixel_size",
-            action="store_true",
-            help="Save intermediate images (quantized and pixelated) in the output directory."
-        )
+        "-p", "--pixel-size",
+        dest="pixel_size",
+        type=int,
+        default=20,
+        help="Size of the pixels in the output image (default: 20)."
+    )
 
     return parser.parse_args()
 

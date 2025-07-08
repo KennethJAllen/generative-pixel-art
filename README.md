@@ -25,7 +25,7 @@ cd generative-pixel-art
 2) Use CLI
 
 ```bash
-python gen_pixel_art/cli.py -i <path/to/img> -c <num colors> -o <output/directory>
+python gen_pixel_art/cli.py -i <path/to/img> -o <output/directory> -c <num colors> -p <pixel size>
 ```
 ## Challenges
 There are many challenges involved in solving this problem. If an LLM is prompted for a pixel art image, the result is a noisy, high resolution image with a non-uniform grid and random artifacts. Due to these issues, standard downsampling techniques do not work. How can we recover the pixel art with "true" resolution and colors?
