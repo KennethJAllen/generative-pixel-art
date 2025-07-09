@@ -94,7 +94,10 @@ def homogenize_lines(lines: list[int], pixel_width: int) -> list[int]:
     for index, section_width in enumerate(section_widths):
         # Get number of pixels to partition section width into
         num_pixels = int(np.round(section_width / pixel_width))
-        section_pixel_width = section_width / num_pixels
+        if num_pixels == 0:
+            section_pixel_width = 0
+        else:
+            section_pixel_width = section_width / num_pixels
         line_start = lines[index]
         section_lines = [line_start + int(n*section_pixel_width) for n in range(num_pixels)]
         # Replace the start index in completed lines with list of new line coordinates
