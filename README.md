@@ -35,7 +35,7 @@ The current approach to turning pixel art into useable assets for games are eith
 2) Manually re-create the image in the approperiate resolution pixel by pixel.
 
 ## Algorithm
-- The main algorithm solves these challenges. Here is a high level overview of the algorithm. We will apply it step by step on this example image of blob pixel art that was generated from GPT-4o.
+- The main algorithm solves these challenges. Here is a high level overview. We will apply it step by step on this example image of blob pixel art that was generated from GPT-4o.
 
 <img src="./data/creatures/blob.png" width="800" alt="blob"/>
 
