@@ -20,7 +20,7 @@ cd generative-pixel-art
 ## Using the Tool
 
 1) Get a pixel art image from an LLM, e.g. GPT-4o, or pixel art from low-quality video, streams, photographs, or screenshots.
-    - If using GPT-4o it is recommended to request a transparent background for the image.
+    - If using GPT-4o it can be helpful to request a transparent background for the image.
 
 2) Use CLI
 
