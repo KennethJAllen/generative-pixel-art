@@ -63,8 +63,12 @@ The current approach to turning pixel art into useable assets for games are eith
 <img src="./assets/blob/mesh.png" width="800" alt="mesh"/>
 
 6) Quantize the original image to a small number of colors.
+    - Note: The result is sensitive to the number of colors chosen.
+    - The parameter is not difficult to tune, but the script may need to be re-run if the colors don't look right.
+    - 8, 16, 32, or 64 typically works.
+    - TODO: Find a heuristic for choosing the number of colors.
 
-7) In each cell specified by the mesh, choose the most common color in the cell as the color for the pixel. Recreate the original image with one pixel per cell.
+8) In each cell specified by the mesh, choose the most common color in the cell as the color for the pixel. Recreate the original image with one pixel per cell.
 
     - Result upsampled by a factor of $20 \times$
 
