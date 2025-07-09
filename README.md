@@ -1,8 +1,8 @@
 # Generative Pixel Art 
 ## Summary
-- Converts text-to-art generated 'pixel' art from LLMs to true resolution pixel art assets for use in games
+- Converts text-to-art generated pixel-art-style images from LLMs to true pixel resolution assets.
 
-- Fix pixel art from compression or screenshots into usable sprites
+- Extracts pixel art from screenshots.
 
 ## Installation
 
