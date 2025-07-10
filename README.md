@@ -167,30 +167,30 @@ The current approach to turning pixel art into useable assets for games are eith
 ## Algorithm
 - The main algorithm solves these challenges. Here is a high level overview. We will apply it step by step on this example image of blob pixel art that was generated from GPT-4o.
 
-<img src="./data/creatures/blob.png" width="50%" alt="blob"/>
+<img src="./data/creatures/blob.png" width="80%" alt="blob"/>
 
 - Note that this image is high resolution and noisy.
 
-<img src="./assets/blob/noisy.png" width="50%" alt="The blob is noisy."/>
+<img src="./assets/blob/noisy.png" width="80%" alt="The blob is noisy."/>
 
 1) Trim the edges of the image and zero out pixels with more than 50% alpha.
     - This is to work around some issues with models such as GPT-4o not giving a perfectly transparent background.
 
 2) Find edges of the pixel art using [Canny edge detection](https://docs.opencv.org/3.4/da/d22/tutorial_py_canny.html).
 
-<img src="./assets/blob/edges.png" width="50%" alt="edges"/>
+<img src="./assets/blob/edges.png" width="80%" alt="blob edges"/>
 
 3) Close small gaps in edges with a [morphological closing](https://docs.opencv.org/4.x/d9/d61/tutorial_py_morphological_ops.html).
 
-<img src="./assets/blob/closed_edges.png" width="50%" alt="closed edges"/>
+<img src="./assets/blob/closed_edges.png" width="80%" alt="blob closed edges"/>
 
 4) Use [Hough transform](https://docs.opencv.org/3.4/d3/de6/tutorial_js_houghlines.html) to get the coordinates of lines in the detected edges. Only keep lines that are close to vertical or horizontal giving some grid coordinates.
 
-<img src="./assets/blob/lines.png" width="50%" alt="lines"/>
+<img src="./assets/blob/lines.png" width="80%" alt="blob lines"/>
 
 5) Find the grid spacing by filtering outliers and taking the median of the spacings, then complete the mesh.
 
-<img src="./assets/blob/mesh.png" width="50%" alt="mesh"/>
+<img src="./assets/blob/mesh.png" width="80%" alt="blob mesh"/>
 
 6) Quantize the original image to a small number of colors.
     - Note: The result is sensitive to the number of colors chosen.
@@ -202,4 +202,4 @@ The current approach to turning pixel art into useable assets for games are eith
 
     - Result upsampled by a factor of $20 \times$
 
-<img src="./assets/blob/upsampled.png" width="50%" alt="upsampled"/>
+<img src="./assets/blob/upsampled.png" width="80%" alt="blob upsampled"/>
