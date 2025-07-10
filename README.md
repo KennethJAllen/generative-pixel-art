@@ -108,7 +108,7 @@ The current approach to turning pixel art into useable assets for games are eith
 
 - Note that this image is high resolution and noisy.
 
-<img src="./assets/blob/blob_resolution.png" width="800" alt="The blob is noisy."/>
+<img src="./assets/blob/noisy.png" width="800" alt="The blob is noisy."/>
 
 1) Trim the edges of the image and zero out pixels with more than 50% alpha.
     - This is to work around some issues with models such as GPT-4o not giving a perfectly transparent background.
