@@ -17,16 +17,30 @@ cd generative-pixel-art
 - Sync environments
     - `uv sync`
 
-## Using the Tool
+## Usage
 
-1) Get a pixel art image from an LLM, e.g. GPT-4o, or pixel art from low-quality video, streams, photographs, or screenshots.
-    - If using GPT-4o it can be helpful to request a transparent background for the image.
+First, obtain a source image (e.g. generated pixel art with a transparent background or a screenshot of low‑quality art).
 
-2) Use CLI
+### Run the CLI
 
 ```bash
-python gen_pixel_art/cli.py -i <path/to/img> -o <output/directory> -c <num colors> -p <pixel size>
+uv run cli -i <input_path> -o <output_path> -c <num_colors> -p <pixel_size> [-t]
 ```
+
+### Flags
+
+| Flag                         | Description                                                                      |
+| ---------------------------- | -------------------------------------------------------------------------------- |
+| `-i`, `--input` `<path>`     | Source image file in pixel-art-style                                             |
+| `-o`, `--output` `<path>`    | Output path for result                                                           |
+| `-c`, `--colors` `<int>`     | Number of colors for output. May need to try a few different values (default 16) |
+| `-p`, `--pixel-size` `<int>` | Size of each “pixel” in the output (default: 20)                                 |
+| `-t`, `--transparent`        | Output with transparent background (default: off)                                |
+
+### Example
+
+`uv run cli -i data/creatures/blob.png -o . -c 16 -p 20 -t`
+
 
 ## Examples
 

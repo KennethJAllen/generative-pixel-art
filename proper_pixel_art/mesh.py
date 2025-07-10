@@ -65,9 +65,10 @@ def detect_grid_lines(edges: np.ndarray,
         elif angle < np.deg2rad(angle_threshold_deg):
             lines_y.append(round((y1 + y2)/2))
 
-    unclustered_lines_x = cluster_lines(lines_x)
-    unclustered_lines_y = cluster_lines(lines_y)
-    return unclustered_lines_x, unclustered_lines_y
+    # Finally cluster the lines so they aren't too close to each other
+    clustered_lines_x = cluster_lines(lines_x)
+    clustered_lines_y = cluster_lines(lines_y)
+    return clustered_lines_x, clustered_lines_y
 
 def get_pixel_width(lines_x: list[int], lines_y: list[int], trim_outlier_fraction: float = 0.2) -> int:
     """
@@ -139,6 +140,8 @@ def compute_mesh(img: Image.Image,
         canny_thresholds: thresholds 1 and 2 for canny edge detection algorithm
         morphological_closure_kernel_size: Kernel size for the morphological closure
 
+    Note: this could even be generalized to detect grid lines that
+    have been distorted via linear transformation.
     """
     # Crop border and zero out mostly transparent pixels from alpha
     cropped_img = utils.crop_border(img, num_pixels=2)

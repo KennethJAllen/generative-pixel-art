@@ -4,7 +4,7 @@ from proper_pixel_art import colors, mesh, utils
 
 def generate_pixel_art(img_path: Path,
                        output_dir: Path,
-                       num_colors: int = 24,
+                       num_colors: int = 16,
                        pixel_size: int = 20,
                        transparent_background: bool = False) -> None:
     """
@@ -25,8 +25,10 @@ def generate_pixel_art(img_path: Path,
         If True, floos fills each corner of the result with transparent alpha.
     """
     img = Image.open(img_path).convert("RGBA")
+    output_dir = output_dir / img_path.stem
+    output_dir.mkdir(exist_ok=True)
 
-    # Try to upsample first.
+    # Try to upsample first. This may help to detect lines.
     upsampled_img = utils.scale_img(img, 2)
     img_mesh = mesh.compute_mesh(upsampled_img, output_dir=output_dir)
 
@@ -63,7 +65,7 @@ def main():
          ]
 
     for img_path, num_colors in img_paths_and_colors:
-        output_dir = Path.cwd() / "output" / img_path.stem
+        output_dir = Path.cwd() / "output"
         output_dir.mkdir(exist_ok=True, parents=True)
         generate_pixel_art(img_path,
                            output_dir,
