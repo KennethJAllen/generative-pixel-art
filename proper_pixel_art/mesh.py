@@ -2,7 +2,7 @@ from pathlib import Path
 from PIL import Image
 import numpy as np
 import cv2
-from gen_pixel_art import utils
+from proper_pixel_art import utils
 
 def close_edges(edges: np.ndarray, kernel_size: int = 10) -> np.ndarray:
     """

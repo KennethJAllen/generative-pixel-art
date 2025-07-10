@@ -1,6 +1,6 @@
 from pathlib import Path
 from PIL import Image
-from gen_pixel_art import colors, mesh, utils
+from proper_pixel_art import colors, mesh, utils
 
 def generate_pixel_art(img_path: Path,
                        output_dir: Path,
