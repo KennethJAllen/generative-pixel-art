@@ -70,6 +70,19 @@ def detect_grid_lines(edges: np.ndarray,
     return unclustered_lines_x, unclustered_lines_y
 
 def get_pixel_width(lines_x: list[int], lines_y: list[int], trim_outlier_fraction: float = 0.2) -> int:
+    """
+    Takes lists of line coordinates in x and y direction, and outlier fraction.
+    Returns the predicted pixel width by filtering outliers and taking the median.
+    We assume that the grid spacing is equal in box x and y direction,
+    which is why dx and dy are concatenated.
+
+    The resulting width does not have to be perfect because the color of the pixels
+    are detemined by which color is mostly in the corresponding cells.
+
+    This method could be generalized to cases when the pixel size in the x direction
+    is different from the y direction, then the width of each direction
+    would have to be calculated separately.
+    """
     dx = np.diff(lines_x)
     dy = np.diff(lines_y)
     gaps = np.concatenate((dx, dy))

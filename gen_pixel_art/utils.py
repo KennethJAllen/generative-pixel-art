@@ -1,9 +1,13 @@
-"""Utility functions for generative pixel art."""
+"""Utility functions"""
 from PIL import Image, ImageDraw
 import numpy as np
 
 def crop_border(image : Image.Image, num_pixels: int=1) -> Image.Image:
-    """Crop the boder of an image by a few pixels."""
+    """
+    Crop the boder of an image by a few pixels.
+    Sometimes when requesting an image from GPT-4o with a transparent background,
+    the boarder pixels will not be transparent, so just remove them.
+    """
     width, height = image.size
     box = (num_pixels, num_pixels, width - num_pixels, height - num_pixels)
     cropped = image.crop(box)
@@ -35,14 +39,7 @@ def overlay_grid_lines(
         line_width: int = 1
         ) -> Image.Image:
     """
-    Overlay vertical and horizontal grid lines over image for visualization.
-
-    inputs:
-        image: The source PIL image (RGBA or RGB).
-        lines_x: Sorted x-coordinates of vertical grid lines.
-        lines_y: Sorted y-coordinates of horizontal grid lines.
-        line_color: RGB tuple for the line color (default red).
-        line_width: Width of the drawn lines in pixels.
+    Overlay vertical (lines_x) and horizontal (lines_y) grid lines over image for visualization.
     """
     # Ensure we draw on an RGBA canvas
     canvas = image.convert("RGBA")
@@ -60,6 +57,7 @@ def overlay_grid_lines(
     return canvas
 
 def scale_img(img: Image.Image, scale: int) -> Image.Image:
+    """Scales the image up via nearest neightbor by scale factor."""
     w, h = img.size
     w_new, h_new = int(w * scale), int(h * scale)
     new_size = w_new, h_new
@@ -67,6 +65,7 @@ def scale_img(img: Image.Image, scale: int) -> Image.Image:
     return scaled_img
 
 def naive_downsample_upsample(img: Image.Image, scale: int) -> Image.Image:
+    """Use naive downsample then upsample on image as baseline to compare results."""
     downsampled = scale_img(img, 1/scale)
     naive = scale_img(downsampled, scale)
     return naive
