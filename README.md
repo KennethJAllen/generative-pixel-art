@@ -24,7 +24,7 @@ First, obtain a source image (e.g. generated pixel art with a transparent backgr
 ### Run the CLI
 
 ```bash
-uv run cli -i <input_path> -o <output_path> -c <num_colors> -p <pixel_size> [-t]
+uv run ppa -i <input_path> -o <output_path> -c <num_colors> -p <pixel_size> [-t]
 ```
 
 ### Flags
@@ -39,7 +39,7 @@ uv run cli -i <input_path> -o <output_path> -c <num_colors> -p <pixel_size> [-t]
 
 ### Example
 
-`uv run cli -i data/creatures/blob.png -o . -c 16 -p 20 -t`
+`uv run ppa -i data/creatures/blob.png -o . -c 16 -p 20 -t`
 
 
 ## Examples

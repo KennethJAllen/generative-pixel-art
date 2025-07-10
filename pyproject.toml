@@ -15,6 +15,7 @@ packages = [
 
 [project.scripts]
 cli = "proper_pixel_art.cli:main"
+ppa = "proper_pixel_art.cli:main"
 
 [build-system]
 requires = ["hatchling"]

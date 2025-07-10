@@ -9,14 +9,14 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "-i", "--input",
-        dest="image_path",
+        dest="img_path",
         type=Path,
         required=True,
         help="Path to the source image file."
     )
     parser.add_argument(
         "-o", "--output",
-        dest="output_path",
+        dest="out_dir",
         type=Path,
         required=True,
         help="Path where the pixelated image will be saved."
@@ -46,8 +46,14 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    generate.generate_pixel_art(args.image_path,
-                                args.output_path,
+    img_path = Path(args.img_path)
+    if not img_path.exists():
+        raise FileNotFoundError(f"Input image path does not exist: {img_path}")
+    out_dir = Path(args.out_dir)
+    if not out_dir.exists():
+        raise FileNotFoundError(f"Output directory does not exist: {out_dir}")
+    generate.generate_pixel_art(img_path,
+                                out_dir,
                                 args.num_colors,
                                 pixel_size=args.pixel_size,
                                 transparent_background=args.transparent)
