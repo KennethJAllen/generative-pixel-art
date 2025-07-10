@@ -8,8 +8,8 @@
 
 ### Clone the Repository:
 ```bash
-git clone git@github.com:KennethJAllen/generative-pixel-art.git
-cd generative-pixel-art
+git clone git@github.com:KennethJAllen/proper-pixel-art.git
+cd proper-pixel-art
 ```
 ### Create Virtual Environment
 
