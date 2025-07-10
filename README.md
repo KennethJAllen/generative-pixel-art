@@ -1,4 +1,4 @@
-# Generative Pixel Art 
+# Proper Pixel Art 
 ## Summary
 - Converts text-to-art generated pixel-art-style images from LLMs to true pixel resolution assets.
 
@@ -17,62 +17,30 @@ cd generative-pixel-art
 - Sync environments
     - `uv sync`
 
-## Using the Tool
+## Usage
 
-1) Get a pixel art image from an LLM, e.g. GPT-4o, or pixel art from low-quality video, streams, photographs, or screenshots.
-    - If using GPT-4o it can be helpful to request a transparent background for the image.
+First, obtain a source image (e.g. generated pixel art with a transparent background or a screenshot of low‑quality art).
 
-2) Use CLI
+### Run the CLI
 
 ```bash
-python gen_pixel_art/cli.py -i <path/to/img> -o <output/directory> -c <num colors> -p <pixel size>
+uv run cli -i <input_path> -o <output_path> -c <num_colors> -p <pixel_size> [-t]
 ```
-## Challenges
-The result of pixel-art style images from LLMs are noisy, high resolution images with a non-uniform grid and random artifacts. Due to these issues, standard downsampling techniques do not work. How can we recover the pixel art with "true" resolution and colors?
 
-The current approach to turning pixel art into useable assets for games are either
-1) Use naive downsampling which does not give a result that is faithful to the original image.
-2) Manually re-create the image in the approperiate resolution pixel by pixel.
+### Flags
 
-## Algorithm
-- The main algorithm solves these challenges. Here is a high level overview. We will apply it step by step on this example image of blob pixel art that was generated from GPT-4o.
+| Flag                         | Description                                                                      |
+| ---------------------------- | -------------------------------------------------------------------------------- |
+| `-i`, `--input` `<path>`     | Source image file in pixel-art-style                                             |
+| `-o`, `--output` `<path>`    | Output path for result                                                           |
+| `-c`, `--colors` `<int>`     | Number of colors for output. May need to try a few different values (default 16) |
+| `-p`, `--pixel-size` `<int>` | Size of each “pixel” in the output (default: 20)                                 |
+| `-t`, `--transparent`        | Output with transparent background (default: off)                                |
 
-<img src="./data/creatures/blob.png" width="800" alt="blob"/>
+### Example
 
-- Note that this image is high resolution and noisy.
+`uv run cli -i data/creatures/blob.png -o . -c 16 -p 20 -t`
 
-<img src="./assets/blob/blob_resolution.png" width="800" alt="The blob is noisy."/>
-
-1) Trim the edges of the image and zero out pixels with more than 50% alpha.
-    - This is to work around some issues with models such as GPT-4o not giving a perfectly transparent background.
-
-2) Find edges of the pixel art using [Canny edge detection](https://docs.opencv.org/3.4/da/d22/tutorial_py_canny.html).
-
-<img src="./assets/blob/edges.png" width="800" alt="edges"/>
-
-3) Close small gaps in edges with a [morphological closing](https://docs.opencv.org/4.x/d9/d61/tutorial_py_morphological_ops.html).
-
-<img src="./assets/blob/closed_edges.png" width="800" alt="closed edges"/>
-
-4) Use [Hough transform](https://docs.opencv.org/3.4/d3/de6/tutorial_js_houghlines.html) to get the coordinates of lines in the detected edges. Only keep lines that are close to vertical or horizontal giving some grid coordinates.
-
-<img src="./assets/blob/lines.png" width="800" alt="lines"/>
-
-5) Find the grid spacing by filtering outliers and taking the median of the spacings, then complete the mesh.
-
-<img src="./assets/blob/mesh.png" width="800" alt="mesh"/>
-
-6) Quantize the original image to a small number of colors.
-    - Note: The result is sensitive to the number of colors chosen.
-    - The parameter is not difficult to tune, but the script may need to be re-run if the colors don't look right.
-    - 8, 16, 32, or 64 typically works.
-    - TODO: Find a heuristic for choosing the number of colors.
-
-8) In each cell specified by the mesh, choose the most common color in the cell as the color for the pixel. Recreate the original image with one pixel per cell.
-
-    - Result upsampled by a factor of $20 \times$
-
-<img src="./assets/blob/upsampled.png" width="800" alt="upsampled"/>
 
 ## Examples
 
@@ -125,3 +93,50 @@ The algorithm is robust. It performs well for images that are already approximat
   <img src="./assets/mountain/mesh.png" width="400" />
   <img src="./assets/mountain/upsampled.png" width="400" />
 </p>
+
+## Challenges
+The result of pixel-art style images from LLMs are noisy, high resolution images with a non-uniform grid and random artifacts. Due to these issues, standard downsampling techniques do not work. How can we recover the pixel art with "true" resolution and colors?
+
+The current approach to turning pixel art into useable assets for games are either
+1) Use naive downsampling which does not give a result that is faithful to the original image.
+2) Manually re-create the image in the approperiate resolution pixel by pixel.
+
+## Algorithm
+- The main algorithm solves these challenges. Here is a high level overview. We will apply it step by step on this example image of blob pixel art that was generated from GPT-4o.
+
+<img src="./data/creatures/blob.png" width="800" alt="blob"/>
+
+- Note that this image is high resolution and noisy.
+
+<img src="./assets/blob/blob_resolution.png" width="800" alt="The blob is noisy."/>
+
+1) Trim the edges of the image and zero out pixels with more than 50% alpha.
+    - This is to work around some issues with models such as GPT-4o not giving a perfectly transparent background.
+
+2) Find edges of the pixel art using [Canny edge detection](https://docs.opencv.org/3.4/da/d22/tutorial_py_canny.html).
+
+<img src="./assets/blob/edges.png" width="800" alt="edges"/>
+
+3) Close small gaps in edges with a [morphological closing](https://docs.opencv.org/4.x/d9/d61/tutorial_py_morphological_ops.html).
+
+<img src="./assets/blob/closed_edges.png" width="800" alt="closed edges"/>
+
+4) Use [Hough transform](https://docs.opencv.org/3.4/d3/de6/tutorial_js_houghlines.html) to get the coordinates of lines in the detected edges. Only keep lines that are close to vertical or horizontal giving some grid coordinates.
+
+<img src="./assets/blob/lines.png" width="800" alt="lines"/>
+
+5) Find the grid spacing by filtering outliers and taking the median of the spacings, then complete the mesh.
+
+<img src="./assets/blob/mesh.png" width="800" alt="mesh"/>
+
+6) Quantize the original image to a small number of colors.
+    - Note: The result is sensitive to the number of colors chosen.
+    - The parameter is not difficult to tune, but the script may need to be re-run if the colors don't look right.
+    - 8, 16, 32, or 64 typically works.
+    - TODO: Find a heuristic for choosing the number of colors.
+
+8) In each cell specified by the mesh, choose the most common color in the cell as the color for the pixel. Recreate the original image with one pixel per cell.
+
+    - Result upsampled by a factor of $20 \times$
+
+<img src="./assets/blob/upsampled.png" width="800" alt="upsampled"/>

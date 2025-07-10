@@ -1,6 +1,6 @@
 from pathlib import Path
 from collections import Counter
-from PIL import Image
+from PIL import Image, ImageDraw
 import numpy as np
 
 def rgba_to_masked_rgb(
@@ -35,7 +35,20 @@ def palette_img(img: Image.Image, num_colors: int = 24, quantize_method: int = 1
     paletted = rbg_img.quantize(colors=num_colors, method=quantize_method)
     return paletted
 
-def downsample(image: Image.Image, mesh: tuple[list[int], list[int]]) -> Image.Image:
+def make_background_transparent(image: Image.Image) -> Image.Image:
+    """Make image background transparent."""
+    im = image.convert("RGBA")
+    corners = [(0, 0), (im.width-1, 0), (0, im.height-1), (im.width-1, im.height-1)]
+    for corner_x, corner_y in corners:
+        fill_color = (0, 0, 0, 0)
+        ImageDraw.floodfill(im, (corner_x, corner_y), fill_color, thresh=0)
+    return im
+
+def downsample(image: Image.Image, mesh: tuple[list[int], list[int]], transparent_background: bool = False) -> Image.Image:
+    """
+    Downsample the image by looping over each cell in mesh and using the most common color as the pixel color.
+    If transparent_background is True, flood fill each corner of the image with 0 alpha.
+    """
     lines_x, lines_y = mesh
     rgba = image.convert("RGBA")
     # reuse your global-quantized RGB version here:
@@ -50,7 +63,10 @@ def downsample(image: Image.Image, mesh: tuple[list[int], list[int]]) -> Image.I
             cell = rgb[y0:y1, x0:x1]
             out[j, i] = get_cell_color(cell)
 
-    return Image.fromarray(out, mode="RGB")
+    result = Image.fromarray(out, mode="RGB")
+    if transparent_background:
+        result = make_background_transparent(result)
+    return result
 
 def main():
     img_path = Path.cwd() / "data" / "objects" / "treasure.png"

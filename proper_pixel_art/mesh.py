@@ -2,7 +2,7 @@ from pathlib import Path
 from PIL import Image
 import numpy as np
 import cv2
-from gen_pixel_art import utils
+from proper_pixel_art import utils
 
 def close_edges(edges: np.ndarray, kernel_size: int = 10) -> np.ndarray:
     """
@@ -65,11 +65,25 @@ def detect_grid_lines(edges: np.ndarray,
         elif angle < np.deg2rad(angle_threshold_deg):
             lines_y.append(round((y1 + y2)/2))
 
-    unclustered_lines_x = cluster_lines(lines_x)
-    unclustered_lines_y = cluster_lines(lines_y)
-    return unclustered_lines_x, unclustered_lines_y
+    # Finally cluster the lines so they aren't too close to each other
+    clustered_lines_x = cluster_lines(lines_x)
+    clustered_lines_y = cluster_lines(lines_y)
+    return clustered_lines_x, clustered_lines_y
 
 def get_pixel_width(lines_x: list[int], lines_y: list[int], trim_outlier_fraction: float = 0.2) -> int:
+    """
+    Takes lists of line coordinates in x and y direction, and outlier fraction.
+    Returns the predicted pixel width by filtering outliers and taking the median.
+    We assume that the grid spacing is equal in box x and y direction,
+    which is why dx and dy are concatenated.
+
+    The resulting width does not have to be perfect because the color of the pixels
+    are detemined by which color is mostly in the corresponding cells.
+
+    This method could be generalized to cases when the pixel size in the x direction
+    is different from the y direction, then the width of each direction
+    would have to be calculated separately.
+    """
     dx = np.diff(lines_x)
     dy = np.diff(lines_y)
     gaps = np.concatenate((dx, dy))
@@ -126,6 +140,8 @@ def compute_mesh(img: Image.Image,
         canny_thresholds: thresholds 1 and 2 for canny edge detection algorithm
         morphological_closure_kernel_size: Kernel size for the morphological closure
 
+    Note: this could even be generalized to detect grid lines that
+    have been distorted via linear transformation.
     """
     # Crop border and zero out mostly transparent pixels from alpha
     cropped_img = utils.crop_border(img, num_pixels=2)

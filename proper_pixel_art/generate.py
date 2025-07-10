@@ -1,8 +1,12 @@
 from pathlib import Path
 from PIL import Image
-from gen_pixel_art import colors, mesh, utils
+from proper_pixel_art import colors, mesh, utils
 
-def generate_pixel_art(img_path: Path, output_dir: Path, num_colors: int = 24, pixel_size: int = 20) -> None:
+def generate_pixel_art(img_path: Path,
+                       output_dir: Path,
+                       num_colors: int = 16,
+                       pixel_size: int = 20,
+                       transparent_background: bool = False) -> None:
     """
     Computes the true resolution pixel art image.
     inputs:
@@ -17,10 +21,14 @@ def generate_pixel_art(img_path: Path, output_dir: Path, num_colors: int = 24, p
         if it is too low, pixels that should be different colors will be the same color
     - pixel_size:
         Size of pixels to upscale result to after algorithm is complete
+    - transparent_background:
+        If True, floos fills each corner of the result with transparent alpha.
     """
     img = Image.open(img_path).convert("RGBA")
+    output_dir = output_dir / img_path.stem
+    output_dir.mkdir(exist_ok=True)
 
-    # Try to upsample first.
+    # Try to upsample first. This may help to detect lines.
     upsampled_img = utils.scale_img(img, 2)
     img_mesh = mesh.compute_mesh(upsampled_img, output_dir=output_dir)
 
@@ -31,7 +39,7 @@ def generate_pixel_art(img_path: Path, output_dir: Path, num_colors: int = 24, p
     else:
         paletted_img = colors.palette_img(upsampled_img, num_colors=num_colors)
 
-    result = colors.downsample(paletted_img, img_mesh)
+    result = colors.downsample(paletted_img, img_mesh, transparent_background=transparent_background)
     upsampled_result = utils.scale_img(result, pixel_size)
 
     result.save(output_dir / "result.png")
@@ -41,7 +49,7 @@ def main():
     data_dir = Path.cwd() / "data"
 
     img_paths_and_colors = [
-         (data_dir / "characters" / "warrior.png", 32),
+         (data_dir / "characters" / "warrior.png", 46),
          (data_dir / "characters" / "werewolf.png", 24),
          (data_dir / "creatures" / "blob.png", 16),
          (data_dir / "creatures" / "bat.png", 16),
@@ -57,7 +65,7 @@ def main():
          ]
 
     for img_path, num_colors in img_paths_and_colors:
-        output_dir = Path.cwd() / "output" / img_path.stem
+        output_dir = Path.cwd() / "output"
         output_dir.mkdir(exist_ok=True, parents=True)
         generate_pixel_art(img_path,
                            output_dir,

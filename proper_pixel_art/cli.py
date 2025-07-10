@@ -1,7 +1,7 @@
 """Command line interface"""
 import argparse
 from pathlib import Path
-from gen_pixel_art import generate
+from proper_pixel_art import generate
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -15,18 +15,18 @@ def parse_args() -> argparse.Namespace:
         help="Path to the source image file."
     )
     parser.add_argument(
-        "-c", "--colors",
-        dest="num_colors",
-        type=int,
-        required=True,
-        help="Number of colors to quantize the image to."
-    )
-    parser.add_argument(
         "-o", "--output",
         dest="output_path",
         type=Path,
         required=True,
         help="Path where the pixelated image will be saved."
+    )
+    parser.add_argument(
+        "-c", "--colors",
+        dest="num_colors",
+        type=int,
+        default=16,
+        help="Number of colors to quantize the image to."
     )
     parser.add_argument(
         "-p", "--pixel-size",
@@ -35,7 +35,13 @@ def parse_args() -> argparse.Namespace:
         default=20,
         help="Size of the pixels in the output image (default: 20)."
     )
-
+    parser.add_argument(
+        "-t", "--transparent",
+        dest="transparent",
+        action="store_true",
+        default=False,
+        help="Produce a transparent background in the output if set."
+    )
     return parser.parse_args()
 
 def main() -> None:
@@ -43,7 +49,8 @@ def main() -> None:
     generate.generate_pixel_art(args.image_path,
                                 args.output_path,
                                 args.num_colors,
-                                pixel_size=args.pixel_size)
+                                pixel_size=args.pixel_size,
+                                transparent_background=args.transparent)
 
 if __name__ == "__main__":
     main()
