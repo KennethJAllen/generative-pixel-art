@@ -1,4 +1,4 @@
-# Generative Pixel Art 
+# Proper Pixel Art 
 ## Summary
 - Converts text-to-art generated pixel-art-style images from LLMs to true pixel resolution assets.
 
