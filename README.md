@@ -132,7 +132,7 @@ Here are a few examples. A mesh is computed, where each cell corresponds to one 
 
 ## Real Images To Pixel Art
 
-- This tool can also be used to convert real images to pixel art by first requesting a pixelated image of the original image from GPT-4o, then using the tool to get the true resolution of the iomage.
+- This tool can also be used to convert real images to pixel art by first requesting a pixelated version of the original image from GPT-4o, then using the tool to get the true pixel-resolution image.
 
 - Consider this image of a mountain
 
