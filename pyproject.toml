@@ -1,6 +1,6 @@
 [project]
 name = "gen_pixel_art"
-version = "0.1.0"
+version = "1.0.0"
 description = "Converts text-to-art generated 'pixel' art from LLMs to true resolution pixel art assets."
 readme = "README.md"
 requires-python = ">=3.12"
