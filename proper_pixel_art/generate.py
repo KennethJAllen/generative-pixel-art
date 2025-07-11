@@ -6,6 +6,7 @@ def generate_pixel_art(img_path: Path,
                        output_dir: Path,
                        num_colors: int = 16,
                        pixel_size: int = 20,
+                       initial_upsample_factor: int = 2,
                        transparent_background: bool = False) -> None:
     """
     Computes the true resolution pixel art image.
@@ -21,6 +22,8 @@ def generate_pixel_art(img_path: Path,
         if it is too low, pixels that should be different colors will be the same color
     - pixel_size:
         Size of pixels to upscale result to after algorithm is complete
+    - initial upsample factor
+        Upsample original image by this factor. It may help detect lines.
     - transparent_background:
         If True, floos fills each corner of the result with transparent alpha.
     """
@@ -29,7 +32,7 @@ def generate_pixel_art(img_path: Path,
     output_dir.mkdir(exist_ok=True)
 
     # Try to upsample first. This may help to detect lines.
-    upsampled_img = utils.scale_img(img, 2)
+    upsampled_img = utils.scale_img(img, initial_upsample_factor)
     img_mesh = mesh.compute_mesh(upsampled_img, output_dir=output_dir)
 
     if len(img_mesh[0]) == 2 or len(img_mesh[1]) == 2:
@@ -51,6 +54,7 @@ def main():
     img_paths_and_colors = [
          (data_dir / "characters" / "warrior.png", 46),
          (data_dir / "characters" / "werewolf.png", 24),
+         (data_dir / "characters" / "wizard.png", 24),
          (data_dir / "creatures" / "blob.png", 16),
          (data_dir / "creatures" / "bat.png", 16),
          (data_dir / "objects" / "treasure.png", 16),
@@ -60,7 +64,6 @@ def main():
          (data_dir / "large" / "demon.png", 64),
          (data_dir / "game" / "ash.png", 16),
          (data_dir / "game" / "pumpkin.png", 32),
-         (data_dir / "real" / "gnocchi.png", 32),
          (data_dir / "real" / "mountain.png", 64),
          ]
 
