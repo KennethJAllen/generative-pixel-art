@@ -50,9 +50,8 @@ def downsample(image: Image.Image, mesh: tuple[list[int], list[int]], transparen
     If transparent_background is True, flood fill each corner of the image with 0 alpha.
     """
     lines_x, lines_y = mesh
-    rgba = image.convert("RGBA")
-    # reuse your global-quantized RGB version here:
-    rgb = np.array(rgba)[:, :, :3]
+    rgba = image.convert("RGB")
+    rgb = np.array(rgba)[:, :, :]
     h_new, w_new = len(lines_y) - 1, len(lines_x) - 1
     out = np.zeros((h_new, w_new, 3), dtype=np.uint8)
 

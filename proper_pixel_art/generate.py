@@ -65,14 +65,16 @@ def main():
          (data_dir / "game" / "ash.png", 16),
          (data_dir / "game" / "pumpkin.png", 32),
          (data_dir / "real" / "mountain.png", 64),
-         ]
+        ]
 
     for img_path, num_colors in img_paths_and_colors:
         output_dir = Path.cwd() / "output"
         output_dir.mkdir(exist_ok=True, parents=True)
         generate_pixel_art(img_path,
                            output_dir,
-                           num_colors=num_colors)
+                           num_colors=num_colors,
+                           transparent_background=False
+                           )
 
 if __name__ == "__main__":
     main()
