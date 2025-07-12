@@ -145,7 +145,7 @@ def compute_mesh(img: Image.Image,
     """
     # Crop border and zero out mostly transparent pixels from alpha
     cropped_img = utils.crop_border(img, num_pixels=2)
-    grey_img = utils.rgba_to_masked_grayscale(cropped_img)
+    grey_img = utils.mask_alpha(cropped_img, mode='L')
 
     # Find edges using Canny edge detection
     edges = cv2.Canny(np.array(grey_img), *canny_thresholds)
