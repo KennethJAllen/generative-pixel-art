@@ -15,7 +15,7 @@ def get_cell_color(cell_pixels: np.ndarray) -> tuple[int,int,int]:
     return cell_color
 
 def palette_img(img: Image.Image, num_colors: int = 24, quantize_method: int = 1) -> Image.Image:
-    rbg_img = utils.mask_alpha(img, mode='RGB')
+    rbg_img = utils.clamp_alpha(img, mode='RGB')
     paletted = rbg_img.quantize(colors=num_colors, method=quantize_method)
     return paletted
 
@@ -52,7 +52,7 @@ def downsample(image: Image.Image, mesh: tuple[list[int], list[int]], transparen
     return result
 
 def main():
-    img_path = Path.cwd() / "data" / "objects" / "treasure.png"
+    img_path = Path.cwd() / "assets" / "blob" / "blob.png"
     img = Image.open(img_path).convert("RGBA")
     paletted = palette_img(img)
     paletted.show()

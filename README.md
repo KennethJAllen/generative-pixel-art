@@ -1,8 +1,8 @@
 # Proper Pixel Art 
 ## Summary
-- Converts text-to-art generated pixel-art-style images from LLMs to true pixel resolution assets.
+- Converts pixel-art-style images from AI to true pixel resolution assets.
 
-- Extracts pixel art from screenshots.
+- Clean screenshots or low-quality web uploads of sprites.
 
 ## Installation
 
@@ -54,7 +54,7 @@ Here are a few examples. A mesh is computed, where each cell corresponds to one 
 <table align="center" width="100%">
   <tr>
     <td width="33%">
-      <img src="./data/creatures/bat.png" style="width:100%;" />
+      <img src="./assets/bat/bat.png" style="width:100%;" />
       <br><small>Original</small>
     </td>
     <td width="33%">
@@ -74,7 +74,7 @@ Here are a few examples. A mesh is computed, where each cell corresponds to one 
 <table align="center" width="100%">
   <tr>
     <td width="33%">
-      <img src="./data/game/ash.png" style="width:100%;" />
+      <img src="./assets/ash/ash.png" style="width:100%;" />
       <br><small>Original</small>
     </td>
     <td width="33%">
@@ -95,7 +95,7 @@ Here are a few examples. A mesh is computed, where each cell corresponds to one 
 <table align="center" width="100%">
   <tr>
     <td width="33%">
-      <img src="./data/large/demon.png" style="width:100%;" />
+      <img src="./assets/demon/demon.png" style="width:100%;" />
       <br><small>Original</small>
     </td>
     <td width="33%">
@@ -115,7 +115,7 @@ Here are a few examples. A mesh is computed, where each cell corresponds to one 
 <table align="center" width="100%">
   <tr>
     <td width="33%">
-      <img src="./data/game/pumpkin.png" style="width:100%;" />
+      <img src="./assets/pumpkin/pumpkin.png" style="width:100%;" />
       <br><small>Original</small>
     </td>
     <td width="33%">
@@ -136,14 +136,14 @@ Here are a few examples. A mesh is computed, where each cell corresponds to one 
 
 - Consider this image of a mountain
 
-<img src="./assets/mountain/original.jpg" width="50%" alt="Original mountain"/>
+<img src="./assets/mountain/real.jpg" width="50%" alt="Original mountain"/>
 
 - Here are the results of first requesting a pixalated version of the mountain, then using the tool to get a true resolution pixel art version.
 
 <table align="center" width="100%">
   <tr>
     <td width="33%">
-      <img src="./data/real/mountain.png" style="width:100%;" />
+      <img src="./assets/mountain/mountain.png" style="width:100%;" />
       <br><small>Original</small>
     </td>
     <td width="33%">
@@ -167,7 +167,7 @@ The current approach to turning pixel art into useable assets for games are eith
 ## Algorithm
 - The main algorithm solves these challenges. Here is a high level overview. We will apply it step by step on this example image of blob pixel art that was generated from GPT-4o.
 
-<img src="./data/creatures/blob.png" width="80%" alt="blob"/>
+<img src="./assets/blob/original.png" width="80%" alt="blob"/>
 
 - Note that this image is high resolution and noisy.
 
@@ -184,7 +184,7 @@ The current approach to turning pixel art into useable assets for games are eith
 
 <img src="./assets/blob/closed_edges.png" width="80%" alt="blob closed edges"/>
 
-4) Use [Hough transform](https://docs.opencv.org/3.4/d3/de6/tutorial_js_houghlines.html) to get the coordinates of lines in the detected edges. Only keep lines that are close to vertical or horizontal giving some grid coordinates.
+4) Use the [Hough transform](https://docs.opencv.org/3.4/d3/de6/tutorial_js_houghlines.html) to get the coordinates of lines in the detected edges. Only keep lines that are close to vertical or horizontal giving some grid coordinates.
 
 <img src="./assets/blob/lines.png" width="80%" alt="blob lines"/>
 

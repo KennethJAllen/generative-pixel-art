@@ -145,7 +145,7 @@ def compute_mesh(img: Image.Image,
     """
     # Crop border and zero out mostly transparent pixels from alpha
     cropped_img = utils.crop_border(img, num_pixels=2)
-    grey_img = utils.mask_alpha(cropped_img, mode='L')
+    grey_img = utils.clamp_alpha(cropped_img, mode='L')
 
     # Find edges using Canny edge detection
     edges = cv2.Canny(np.array(grey_img), *canny_thresholds)
@@ -177,10 +177,10 @@ def compute_mesh(img: Image.Image,
     return mesh_x, mesh_y
 
 def main():
-    img_path = Path.cwd() / "data" / "objects" / "treasure.png"
+    img_path = Path.cwd() / "assets" / "blob" / "original.png"
     img = Image.open(img_path).convert("RGBA")
-    grid_lines = compute_mesh(img)
-    print(grid_lines)
+    mesh_x, mesh_y = compute_mesh(img)
+    print(mesh_x, mesh_y)
 
 if __name__ == "__main__":
     main()

@@ -12,11 +12,11 @@ def crop_border(image : Image.Image, num_pixels: int=1) -> Image.Image:
     cropped = image.crop(box)
     return cropped
 
-def mask_alpha(
+def clamp_alpha(
         image: Image.Image,
         alpha_threshold: int = 128,
         mode: str = 'RGB',
-        background_hex: str = "#4B0082"
+        background_hex: str = "#000000"
         ) -> Image.Image:
     """
     Convert image to RGB or greyscale,
@@ -68,7 +68,7 @@ def scale_img(img: Image.Image, scale: int) -> Image.Image:
     w, h = img.size
     w_new, h_new = int(w * scale), int(h * scale)
     new_size = w_new, h_new
-    scaled_img = img.resize(new_size, resample=Image.NEAREST)
+    scaled_img = img.resize(new_size, resample=Image.Resampling.NEAREST)
     return scaled_img
 
 def naive_downsample_upsample(img: Image.Image, scale: int) -> Image.Image:

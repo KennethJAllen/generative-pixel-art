@@ -49,22 +49,15 @@ def generate_pixel_art(img_path: Path,
     upsampled_result.save(output_dir / "upsampled.png")
 
 def main():
-    data_dir = Path.cwd() / "data"
+    data_dir = Path.cwd() / "assets"
 
     img_paths_and_colors = [
-        (data_dir / "characters" / "warrior.png", 46),
-        (data_dir / "characters" / "werewolf.png", 24),
-        (data_dir / "characters" / "wizard.png", 24),
-        (data_dir / "creatures" / "blob.png", 16),
-        (data_dir / "creatures" / "bat.png", 16),
-        (data_dir / "objects" / "treasure.png", 16),
-        (data_dir / "objects" / "gemstone.png", 24),
-        (data_dir / "tiles" / "grass.png", 16),
-        (data_dir / "tiles" / "stone.png", 16),
-        (data_dir / "large" / "demon.png", 64),
-        (data_dir / "game" / "ash.png", 16),
-        (data_dir / "game" / "pumpkin.png", 32),
-        (data_dir / "real" / "mountain.png", 64),
+        (data_dir / "blob" / "blob.png", 16),
+        (data_dir / "bat" / "bat.png", 16),
+        (data_dir / "demon" / "demon.png", 64),
+        (data_dir / "ash" / "ash.png", 16),
+        (data_dir / "pumpkin" / "pumpkin.png", 32),
+        (data_dir / "mountain" / "mountain.png", 64),
         ]
 
     for img_path, num_colors in img_paths_and_colors:
