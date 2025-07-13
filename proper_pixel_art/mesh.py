@@ -138,7 +138,13 @@ def compute_mesh(img: Image.Image,
     inputs:
         img_path: Path to image
         canny_thresholds: thresholds 1 and 2 for canny edge detection algorithm
-        morphological_closure_kernel_size: Kernel size for the morphological closure
+        closure_kernel_size: Kernel size for the morphological closure
+        output_dir (optional): If set, saves images of steps in algorithm to dir
+    
+    output:
+        Returns tuple of two lists of integer coordinates:
+        - mesh_x: Coordinates of pixel mesh on the x-axis
+        - mesh_y: Coordinates of pixel mesh on the y-axis
 
     Note: this could even be generalized to detect grid lines that
     have been distorted via linear transformation.

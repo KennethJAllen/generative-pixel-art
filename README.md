@@ -39,7 +39,7 @@ uv run ppa -i <input_path> -o <output_path> -c <num_colors> -p <pixel_size> [-t]
 
 ### Example
 
-`uv run ppa -i data/creatures/blob.png -o . -c 16 -p 20 -t`
+`uv run ppa -i assets/blob/blob.png -o . -c 16 -p 20 -t`
 
 
 ## Examples
@@ -167,7 +167,7 @@ The current approach to turning pixel art into useable assets for games are eith
 ## Algorithm
 - The main algorithm solves these challenges. Here is a high level overview. We will apply it step by step on this example image of blob pixel art that was generated from GPT-4o.
 
-<img src="./assets/blob/original.png" width="80%" alt="blob"/>
+<img src="./assets/blob/blob.png" width="80%" alt="blob"/>
 
 - Note that this image is high resolution and noisy.
 

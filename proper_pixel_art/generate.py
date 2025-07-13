@@ -33,11 +33,11 @@ def generate_pixel_art(img_path: Path,
 
     # Upsample first. This may help to detect lines.
     upsampled_img = utils.scale_img(img, initial_upsample_factor)
-    img_mesh = mesh.compute_mesh(upsampled_img, output_dir=output_dir)
+    img_mesh = mesh.compute_mesh(upsampled_img)
 
     if len(img_mesh[0]) == 2 or len(img_mesh[1]) == 2:
         # If no mesh is found, then use the original image instead.
-        img_mesh = mesh.compute_mesh(img, output_dir=output_dir)
+        img_mesh = mesh.compute_mesh(img)
         paletted_img = colors.palette_img(img, num_colors=num_colors)
     else:
         paletted_img = colors.palette_img(upsampled_img, num_colors=num_colors)
