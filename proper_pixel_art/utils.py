@@ -1,6 +1,5 @@
 """Utility functions"""
-from PIL import Image, ImageDraw
-import numpy as np
+from PIL import Image, ImageDraw, ImageColor
 
 def crop_border(image : Image.Image, num_pixels: int=1) -> Image.Image:
     """
@@ -13,23 +12,31 @@ def crop_border(image : Image.Image, num_pixels: int=1) -> Image.Image:
     cropped = image.crop(box)
     return cropped
 
-def rgba_to_masked_grayscale(image: Image.Image, opacity_threshold: int = 128) -> Image.Image:
+def clamp_alpha(
+        image: Image.Image,
+        alpha_threshold: int = 128,
+        mode: str = 'RGB',
+        background_hex: str = "#000000"
+        ) -> Image.Image:
     """
-    Convert an RGBA image to 8-bit grayscale,
-    forcing any semi- or fully-transparent pixel to zero.
+    Convert image to RGB or greyscale,
+    setting pixels bellow alpha threshold to background_color.
     """
-    rgba = image.convert("RGBA")
-    arr = np.array(rgba)
+    if mode not in ('RGB', 'L'):
+        raise ValueError("mode must be 'RGB' or 'L'")
 
-    # get channels and compute luma (Rec. 601)
-    r, g, b, a = arr[..., 0], arr[..., 1], arr[..., 2], arr[..., 3]
-    luma = (0.299*r + 0.587*g + 0.114*b).astype(np.uint8)
+    background_color = ImageColor.getrgb(background_hex)
 
-    # zero out anything below the opacity threshold
-    luma[a < opacity_threshold] = 0
+    base = image.convert(mode)
+    alpha = image.getchannel('A')
+    mask = alpha.point(lambda p: 255 if p >= alpha_threshold else 0)
 
-    greyscale = Image.fromarray(luma, mode="L")
-    return greyscale
+    background = Image.new('RGB', image.size, background_color)
+    if mode == 'L':
+        background = background.convert('L')
+
+    masked_image = Image.composite(base, background, mask)
+    return masked_image
 
 def overlay_grid_lines(
         image: Image.Image,
@@ -61,7 +68,7 @@ def scale_img(img: Image.Image, scale: int) -> Image.Image:
     w, h = img.size
     w_new, h_new = int(w * scale), int(h * scale)
     new_size = w_new, h_new
-    scaled_img = img.resize(new_size, resample=Image.NEAREST)
+    scaled_img = img.resize(new_size, resample=Image.Resampling.NEAREST)
     return scaled_img
 
 def naive_downsample_upsample(img: Image.Image, scale: int) -> Image.Image:

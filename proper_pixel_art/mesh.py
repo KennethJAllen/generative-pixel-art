@@ -124,10 +124,12 @@ def homogenize_lines(lines: list[int], pixel_width: int) -> list[int]:
 
     return complete_lines
 
-def compute_mesh(img: Image.Image,
-                 canny_thresholds: tuple[int] = (50, 200),
-                 closure_kernel_size: int = 8,
-                 output_dir: Path | None = None) -> tuple[list[int]]:
+def compute_mesh(
+        img: Image.Image,
+        canny_thresholds: tuple[int] = (50, 200),
+        closure_kernel_size: int = 8,
+        output_dir: Path | None = None
+        ) -> tuple[list[int], list[int]]:
     """
     Finds grid lines of a high resolution noisy image.
     - Uses Canny edge detector to find vertical and horizontal edges
@@ -138,14 +140,20 @@ def compute_mesh(img: Image.Image,
     inputs:
         img_path: Path to image
         canny_thresholds: thresholds 1 and 2 for canny edge detection algorithm
-        morphological_closure_kernel_size: Kernel size for the morphological closure
+        closure_kernel_size: Kernel size for the morphological closure
+        output_dir (optional): If set, saves images of steps in algorithm to dir
+    
+    output:
+        Returns tuple of two lists of integer coordinates:
+        - mesh_x: Coordinates of pixel mesh on the x-axis
+        - mesh_y: Coordinates of pixel mesh on the y-axis
 
     Note: this could even be generalized to detect grid lines that
     have been distorted via linear transformation.
     """
     # Crop border and zero out mostly transparent pixels from alpha
     cropped_img = utils.crop_border(img, num_pixels=2)
-    grey_img = utils.rgba_to_masked_grayscale(cropped_img)
+    grey_img = utils.clamp_alpha(cropped_img, mode='L')
 
     # Find edges using Canny edge detection
     edges = cv2.Canny(np.array(grey_img), *canny_thresholds)
@@ -176,11 +184,37 @@ def compute_mesh(img: Image.Image,
 
     return mesh_x, mesh_y
 
+def compute_mesh_with_scaling(
+        img: Image.Image,
+        upsample_factor: int,
+        output_dir: Path | None = None
+        ) -> tuple[tuple[list[int], list[int]], Image.Image]:
+    """
+    Try to compute the mesh on an upsampled image.
+    If that yields only the trivial boundary lines, fall back to the original.
+    """
+    upsampled_img = utils.scale_img(img, upsample_factor)
+    mesh_coords = compute_mesh(upsampled_img, output_dir=output_dir)
+    if not _is_trivial_mesh(mesh_coords):
+        return mesh_coords, upsampled_img
+
+    # If no mesh is found, then use the original image instead.
+    fallback_mesh = compute_mesh(img, output_dir=output_dir)
+    return fallback_mesh, img
+
+def _is_trivial_mesh(img_mesh: tuple[list[int], list[int]]) -> bool:
+    """
+    Returns True if no lines have been identified when computing the mesh.
+    That is, the points in mesh_x and mesh_y conist of the left, right, and top, bottom
+    of the image respectively.
+    """
+    return len(img_mesh[0]) == 2 and len(img_mesh[1]) == 2
+
 def main():
-    img_path = Path.cwd() / "data" / "objects" / "treasure.png"
+    img_path = Path.cwd() / "assets" / "blob" / "original.png"
     img = Image.open(img_path).convert("RGBA")
-    grid_lines = compute_mesh(img)
-    print(grid_lines)
+    mesh_x, mesh_y = compute_mesh(img)
+    print(mesh_x, mesh_y)
 
 if __name__ == "__main__":
     main()
