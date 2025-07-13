@@ -71,8 +71,8 @@ def main():
         generate_pixel_art(img_path,
                            output_dir,
                            num_colors=num_colors,
-                           transparent_background=True,
-                           save_intermediates=True
+                           transparent_background=False,
+                           save_intermediates=True,
                            )
 
 if __name__ == "__main__":
