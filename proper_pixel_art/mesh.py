@@ -124,10 +124,12 @@ def homogenize_lines(lines: list[int], pixel_width: int) -> list[int]:
 
     return complete_lines
 
-def compute_mesh(img: Image.Image,
-                 canny_thresholds: tuple[int] = (50, 200),
-                 closure_kernel_size: int = 8,
-                 output_dir: Path | None = None) -> tuple[list[int]]:
+def compute_mesh(
+        img: Image.Image,
+        canny_thresholds: tuple[int] = (50, 200),
+        closure_kernel_size: int = 8,
+        output_dir: Path | None = None
+        ) -> tuple[list[int], list[int]]:
     """
     Finds grid lines of a high resolution noisy image.
     - Uses Canny edge detector to find vertical and horizontal edges
@@ -181,6 +183,32 @@ def compute_mesh(img: Image.Image,
         img_with_completed_lines.save(output_dir / "mesh.png")
 
     return mesh_x, mesh_y
+
+def compute_mesh_with_scaling(
+        img: Image.Image,
+        upsample_factor: int,
+        output_dir: Path | None = None
+        ) -> tuple[tuple[list[int], list[int]], Image.Image]:
+    """
+    Try to compute the mesh on an upsampled image.
+    If that yields only the trivial boundary lines, fall back to the original.
+    """
+    upsampled_img = utils.scale_img(img, upsample_factor)
+    mesh_coords = compute_mesh(upsampled_img, output_dir=output_dir)
+    if not _is_trivial_mesh(mesh_coords):
+        return mesh_coords, upsampled_img
+
+    # If no mesh is found, then use the original image instead.
+    fallback_mesh = compute_mesh(img, output_dir=output_dir)
+    return fallback_mesh, img
+
+def _is_trivial_mesh(img_mesh: tuple[list[int], list[int]]) -> bool:
+    """
+    Returns True if no lines have been identified when computing the mesh.
+    That is, the points in mesh_x and mesh_y conist of the left, right, and top, bottom
+    of the image respectively.
+    """
+    return len(img_mesh[0]) == 2 and len(img_mesh[1]) == 2
 
 def main():
     img_path = Path.cwd() / "assets" / "blob" / "original.png"

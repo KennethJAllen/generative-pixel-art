@@ -2,12 +2,15 @@ from pathlib import Path
 from PIL import Image
 from proper_pixel_art import colors, mesh, utils
 
-def generate_pixel_art(img_path: Path,
-                       output_dir: Path,
-                       num_colors: int = 16,
-                       pixel_size: int = 20,
-                       initial_upsample_factor: int = 2,
-                       transparent_background: bool = False) -> None:
+def generate_pixel_art(
+        img_path: Path,
+        output_dir: Path,
+        num_colors: int = 16,
+        pixel_size: int = 20,
+        upsample_factor: int = 2,
+        transparent_background: bool = False,
+        save_intermediates: bool = False,
+        ) -> None:
     """
     Computes the true resolution pixel art image.
     inputs:
@@ -22,31 +25,33 @@ def generate_pixel_art(img_path: Path,
         if it is too low, pixels that should be different colors will be the same color
     - pixel_size:
         Size of pixels to upscale result to after algorithm is complete
-    - initial upsample factor
+    - upsample_factor:
         Upsample original image by this factor. It may help detect lines.
     - transparent_background:
         If True, floos fills each corner of the result with transparent alpha.
+        Default False.
+    - save_intermediate_imgs:
+        If True, saves images of edge detection and mesh generation to output dir.
     """
     img = Image.open(img_path).convert("RGBA")
-    output_dir = output_dir / img_path.stem
-    output_dir.mkdir(exist_ok=True)
+    work_dir = output_dir / img_path.stem
+    work_dir.mkdir(exist_ok=True)
 
-    # Upsample first. This may help to detect lines.
-    upsampled_img = utils.scale_img(img, initial_upsample_factor)
-    img_mesh = mesh.compute_mesh(upsampled_img)
-
-    if len(img_mesh[0]) == 2 or len(img_mesh[1]) == 2:
-        # If no mesh is found, then use the original image instead.
-        img_mesh = mesh.compute_mesh(img)
-        paletted_img = colors.palette_img(img, num_colors=num_colors)
+    if save_intermediates:
+        mesh_dir = work_dir
     else:
-        paletted_img = colors.palette_img(upsampled_img, num_colors=num_colors)
+        mesh_dir = None
 
-    result = colors.downsample(paletted_img, img_mesh, transparent_background=transparent_background)
+
+    mesh_coords, scaled_img = mesh.compute_mesh_with_scaling(img, upsample_factor, output_dir=mesh_dir)
+
+    paletted_img = colors.palette_img(scaled_img, num_colors=num_colors)
+
+    result = colors.downsample(paletted_img, mesh_coords, transparent_background=transparent_background)
     upsampled_result = utils.scale_img(result, pixel_size)
 
-    result.save(output_dir / "result.png")
-    upsampled_result.save(output_dir / "upsampled.png")
+    result.save(work_dir / "result.png")
+    upsampled_result.save(work_dir / "upsampled.png")
 
 def main():
     data_dir = Path.cwd() / "assets"
@@ -66,7 +71,8 @@ def main():
         generate_pixel_art(img_path,
                            output_dir,
                            num_colors=num_colors,
-                           transparent_background=False
+                           transparent_background=True,
+                           save_intermediates=True
                            )
 
 if __name__ == "__main__":
