@@ -25,6 +25,8 @@ First, obtain a source pixel-art-style image (e.g. a pixel-art-style image gener
 
 ```bash
 uv run ppa -i <input_path> -o <output_path> -c <num_colors> -p <pixel_size> [-t]
+# or directly using uvx
+uvx --from https://github.com/KennethJAllen/proper-pixel-art.git ppa -i <input_path> -o <output_path> -c <num_colors> -p <pixel_size> [-t]
 ```
 
 ### Flags
