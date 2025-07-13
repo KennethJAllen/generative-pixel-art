@@ -109,7 +109,7 @@ Here are a few examples. A mesh is computed, where each cell corresponds to one 
 </table>
 
 ### Pumpkin
-- Screenshot from Google Images of Stardew Valley asset.
+- Screenshot from Google Images of Stardew Valley asset. This is an adversarial exmaple as the source image is both low quality and the object is round.
 
 <table align="center" width="100%">
   <tr>
