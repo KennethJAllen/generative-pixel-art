@@ -189,7 +189,7 @@ The current approach to turning pixel art into useable assets for games are eith
 
 <img src="./assets/blob/closed_edges.png" width="80%" alt="blob closed edges"/>
 
-4) Use the [Hough transform](https://docs.opencv.org/3.4/d3/de6/tutorial_js_houghlines.html) to get the coordinates of lines in the detected edges. Only keep lines that are close to vertical or horizontal giving some grid coordinates. Cluster lines that are closeby together.
+5) Take the [Hough transform](https://docs.opencv.org/3.4/d3/de6/tutorial_js_houghlines.html) to get the coordinates of lines in the detected edges. Only keep lines that are close to vertical or horizontal giving some grid coordinates. Cluster lines that are closeby together.
 
 <img src="./assets/blob/lines.png" width="80%" alt="blob lines"/>
 
