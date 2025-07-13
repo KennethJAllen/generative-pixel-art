@@ -1,6 +1,6 @@
 # Proper Pixel Art 
 ## Summary
-- Converts noisy, high resolution pixel-art-style images to true pixel resolution assets, such as those produced by generative models.
+- Converts noisy, high resolution pixel-art-style images such as those produced by generative models to true pixel resolution assets.
 
 - Clean screenshots or low-quality web uploads of sprites.
 
