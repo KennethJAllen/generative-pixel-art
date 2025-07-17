@@ -194,13 +194,13 @@ def compute_mesh_with_scaling(
     If that yields only the trivial boundary lines, fall back to the original.
     """
     upsampled_img = utils.scale_img(img, upsample_factor)
-    mesh_coords = compute_mesh(upsampled_img, output_dir=output_dir)
-    if not _is_trivial_mesh(mesh_coords):
-        return mesh_coords, upsampled_img
+    mesh_lines = compute_mesh(upsampled_img, output_dir=output_dir)
+    if not _is_trivial_mesh(mesh_lines):
+        return mesh_lines, upsampled_img
 
     # If no mesh is found, then use the original image instead.
-    fallback_mesh = compute_mesh(img, output_dir=output_dir)
-    return fallback_mesh, img
+    fallback_mesh_lines = compute_mesh(img, output_dir=output_dir)
+    return fallback_mesh_lines, img
 
 def _is_trivial_mesh(img_mesh: tuple[list[int], list[int]]) -> bool:
     """
@@ -211,7 +211,7 @@ def _is_trivial_mesh(img_mesh: tuple[list[int], list[int]]) -> bool:
     return len(img_mesh[0]) == 2 and len(img_mesh[1]) == 2
 
 def main():
-    img_path = Path.cwd() / "assets" / "blob" / "original.png"
+    img_path = Path.cwd() / "assets" / "blob" / "blob.png"
     img = Image.open(img_path).convert("RGBA")
     mesh_x, mesh_y = compute_mesh(img)
     print(mesh_x, mesh_y)
