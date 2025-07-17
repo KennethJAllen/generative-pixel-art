@@ -34,9 +34,9 @@ uvx --from https://github.com/KennethJAllen/proper-pixel-art.git ppa -i <input_p
 | Flag                         | Description                                                                      |
 | ---------------------------- | -------------------------------------------------------------------------------- |
 | `-i`, `--input` `<path>`     | Source image file in pixel-art-style                                             |
-| `-o`, `--output` `<path>`    | Output path for result                                                           |
+| `-o`, `--output` `<path>`    | Output directory or file path for result                                         |
 | `-c`, `--colors` `<int>`     | Number of colors for output. May need to try a few different values (default 16) |
-| `-p`, `--pixel-size` `<int>` | Size of each “pixel” in the output (default: 20)                                 |
+| `-p`, `--pixel-size` `<int>` | Size of each “pixel” in the output (default: 1)                                  |
 | `-t`, `--transparent`        | Output with transparent background (default: off)                                |
 
 #### Example
