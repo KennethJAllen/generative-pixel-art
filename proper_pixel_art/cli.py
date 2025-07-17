@@ -1,6 +1,7 @@
 """Command line interface"""
 import argparse
 from pathlib import Path
+from PIL import Image
 from proper_pixel_art import generate
 
 def parse_args() -> argparse.Namespace:
@@ -16,10 +17,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "-o", "--output",
-        dest="out_dir",
+        dest="out_path",
         type=Path,
         required=True,
-        help="Path where the pixelated image will be saved."
+        help="Path where the pixelated image will be saved. Can be either a directory or a file path."
     )
     parser.add_argument(
         "-c", "--colors",
@@ -32,8 +33,8 @@ def parse_args() -> argparse.Namespace:
         "-p", "--pixel-size",
         dest="pixel_size",
         type=int,
-        default=20,
-        help="Size of the pixels in the output image (default: 20)."
+        default=1,
+        help="Width of the 'pixels' in the output image (default: 1)."
     )
     parser.add_argument(
         "-t", "--transparent",
@@ -44,19 +45,31 @@ def parse_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
+def resolve_output_path(out_path: Path, input_path: Path, suffix: str = "_pixelated") -> Path:
+    """
+    If outpath is a directory, make it a file path
+    with filename e.g. (input stem)_pixelated.png
+    """
+    if out_path.suffix:
+        return out_path
+    filename = f"{input_path.stem}{suffix}.png"
+    return out_path / filename
+
 def main() -> None:
     args = parse_args()
     img_path = Path(args.img_path)
-    if not img_path.exists():
-        raise FileNotFoundError(f"Input image path does not exist: {img_path}")
-    out_dir = Path(args.out_dir)
-    if not out_dir.exists():
-        raise FileNotFoundError(f"Output directory does not exist: {out_dir}")
-    generate.generate_pixel_art(img_path,
-                                out_dir,
-                                args.num_colors,
-                                pixel_size=args.pixel_size,
-                                transparent_background=args.transparent)
+    out_path = resolve_output_path(Path(args.out_path), img_path)
+    out_path.parent.mkdir(exist_ok=True, parents=True)
+
+    img = Image.open(img_path)
+    pixelated = generate.pixelate(
+        img,
+        num_colors = args.num_colors,
+        pixel_size = args.pixel_size,
+        transparent_background = args.transparent
+        )
+
+    pixelated.save(out_path)
 
 if __name__ == "__main__":
     main()
