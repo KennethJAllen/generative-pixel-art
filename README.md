@@ -181,7 +181,7 @@ The current approach to turning pixel art into useable assets for games are eith
     - This can help identify the correct pixel mesh.
     - It is possible that a similar result could be achived by tuning the parameters in the following steps. Further investigation is required.
 
-3) Find edges of the pixel art using [Canny edge detection](https://docs.opencv.org/3.4/da/d22/tutorial_py_canny.html).
+3) Find edges of the pixel art using [Canny edge detection](https://docs.opencv.org/4.x/da/d22/tutorial_py_canny.html).
 
 <img src="./assets/blob/edges.png" width="80%" alt="blob edges"/>
 
@@ -189,7 +189,7 @@ The current approach to turning pixel art into useable assets for games are eith
 
 <img src="./assets/blob/closed_edges.png" width="80%" alt="blob closed edges"/>
 
-5) Take the [Hough transform](https://docs.opencv.org/3.4/d3/de6/tutorial_js_houghlines.html) to get the coordinates of lines in the detected edges. Only keep lines that are close to vertical or horizontal giving some grid coordinates. Cluster lines that are closeby together.
+5) Take the [Hough transform](https://docs.opencv.org/4.x/d3/de6/tutorial_js_houghlines.html) to get the coordinates of lines in the detected edges. Only keep lines that are close to vertical or horizontal giving some grid coordinates. Cluster lines that are closeby together.
 
 <img src="./assets/blob/lines.png" width="80%" alt="blob lines"/>
 
