@@ -2,22 +2,19 @@ from pathlib import Path
 from PIL import Image
 from proper_pixel_art import colors, mesh, utils
 
-def generate_pixel_art(
-        img_path: Path,
-        output_dir: Path,
+def pixelate(
+        image: Image.Image,
         num_colors: int = 16,
-        upsample_factor: int = 2,
+        initial_upsample_factor: int = 2,
         pixel_size: int | None = None,
         transparent_background: bool = False,
-        save_intermediates: bool = False,
-        ) -> None:
+        intermediate_dir: Path | None = None,
+        ) -> Image.Image:
     """
     Computes the true resolution pixel art image.
     inputs:
-    - img_path:
-        path of image to compute true resolution art
-    - output_dir:
-        output directory
+    - image:
+        A PIL image to pixelate.
     - num_colors:
         The number of colors to use when quantizing the image.
         This is an important parameter to tune,
@@ -29,28 +26,22 @@ def generate_pixel_art(
         Upsample original image by this factor. It may help detect lines.
     - transparent_background:
         If True, floos fills each corner of the result with transparent alpha.
-        Default False.
-    - save_intermediate_imgs:
-        If True, saves images of edge detection and mesh generation to output dir.
+    - intermediate_dir:
+        directory to save images visualizing intermediate steps.
+    
+    Returns the result
     """
-    img = Image.open(img_path).convert("RGBA")
-    work_dir = output_dir / img_path.stem
-    work_dir.mkdir(exist_ok=True)
+    rgba = image.convert("RGBA")
 
-    if save_intermediates:
-        mesh_dir = work_dir
-    else:
-        mesh_dir = None
-
-    mesh_coords, scaled_img = mesh.compute_mesh_with_scaling(img, upsample_factor, output_dir=mesh_dir)
+    mesh_lines, scaled_img = mesh.compute_mesh_with_scaling(rgba, initial_upsample_factor, output_dir=intermediate_dir)
 
     paletted_img = colors.palette_img(scaled_img, num_colors=num_colors)
 
-    result = colors.downsample(paletted_img, mesh_coords, transparent_background=transparent_background)
+    result = colors.downsample(paletted_img, mesh_lines, transparent_background=transparent_background)
     if pixel_size is not None:
-        result = utils.scale_img(result, pixel_size)
+        result = utils.scale_img(result, int(pixel_size))
 
-    result.save(work_dir / "result.png")
+    return result
 
 def main():
     data_dir = Path.cwd() / "assets"
@@ -65,15 +56,17 @@ def main():
         ]
 
     for img_path, num_colors in img_paths_and_colors:
-        output_dir = Path.cwd() / "output"
+        output_dir = Path.cwd() / "output" / img_path.stem
         output_dir.mkdir(exist_ok=True, parents=True)
-        generate_pixel_art(img_path,
-                           output_dir,
-                           pixel_size=20,
-                           num_colors=num_colors,
-                           transparent_background=False,
-                           save_intermediates=True,
-                           )
+        img = Image.open(img_path)
+        result = pixelate(
+            img,
+            pixel_size = 20,
+            num_colors = num_colors,
+            transparent_background = False,
+            intermediate_dir = output_dir,
+            )
+        result.save(output_dir / "result.png")
 
 if __name__ == "__main__":
     main()
