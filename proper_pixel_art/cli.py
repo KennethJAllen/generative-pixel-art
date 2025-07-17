@@ -2,7 +2,7 @@
 import argparse
 from pathlib import Path
 from PIL import Image
-from proper_pixel_art import generate
+from proper_pixel_art import pixelate
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -62,7 +62,7 @@ def main() -> None:
     out_path.parent.mkdir(exist_ok=True, parents=True)
 
     img = Image.open(img_path)
-    pixelated = generate.pixelate(
+    pixelated = pixelate.pixelate(
         img,
         num_colors = args.num_colors,
         pixel_size = args.pixel_size,
