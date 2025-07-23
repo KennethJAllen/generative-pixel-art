@@ -14,7 +14,7 @@ def get_cell_color(cell_pixels: np.ndarray) -> tuple[int,int,int]:
     cell_color = Counter(flat).most_common(1)[0][0]
     return cell_color
 
-def palette_img(img: Image.Image, num_colors: int = 24, quantize_method: int = 1) -> Image.Image:
+def palette_img(img: Image.Image, num_colors: int = 16, quantize_method: int = 1) -> Image.Image:
     rbg_img = utils.clamp_alpha(img, mode='RGB')
     paletted = rbg_img.quantize(colors=num_colors, method=quantize_method)
     return paletted

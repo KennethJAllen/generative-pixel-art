@@ -43,21 +43,49 @@ uvx --from https://github.com/KennethJAllen/proper-pixel-art.git ppa -i <input_p
 
 `uv run ppa -i assets/blob/blob.png -o . -c 16 -p 20 -t`
 
-### Library
+### Python
+
+#### Simple Example
 
 ```python
+from PIL import Image
 from proper_pixel_art.pixelate import pixelate
 
-# returns a PIL Image of your true‑resolution pixel art from image
-result = pixelate(
-    image, 
-    num_colors=16, 
-    initial_upsample_factor=2, 
-    pixel_size=20, 
-    transparent_background=False, 
-    intermediate_dir=None
-)
+image = Image.open('input.png')
+result = pixelate(image, num_colors=16)
+result.save('output.png')
 ```
+
+#### Parameters
+
+- `image` : `PIL.Image.Image`
+
+  - A PIL image to pixelate.
+
+- `num_colors` : `int`
+
+  - The number of colors in result.
+  - May need to try a few values if the colors don't look right.
+  - 8, 16, 32, or 64 typically works.
+
+- `pixel_size` : `int`
+
+  - Upscale result after algorithm is complete if not None.
+
+- `upsample_factor` : `int`
+
+  - Upscale initial image. This may help detect lines.
+
+- `transparent_background` : `bool`
+  - If True, floos fills each corner of the result with transparent alpha.
+
+- `intermediate_dir` : `Path | None` 
+
+  - Directory to save images visualizing intermediate steps of algorithm. Useful for development.
+
+#### Returns
+
+A PIL image with 
 
 ## Examples
 
@@ -193,7 +221,7 @@ The current approach to turning pixel art into useable assets for games are eith
 1) Trim the edges of the image and zero out pixels with more than 50% alpha.
     - This is to work around some issues with models such as GPT-4o not giving a perfectly transparent background.
 
-2) Upsample by a factor of 2 using nearest neighbor.
+2) Upscale by a factor of 2 using nearest neighbor.
     - This can help identify the correct pixel mesh.
     - It is possible that a similar result could be achived by tuning the parameters in the following steps. Further investigation is required.
 
@@ -205,7 +233,7 @@ The current approach to turning pixel art into useable assets for games are eith
 
 <img src="./assets/blob/closed_edges.png" width="80%" alt="blob closed edges"/>
 
-5) Take the [Hough transform](https://docs.opencv.org/4.x/d3/de6/tutorial_js_houghlines.html) to get the coordinates of lines in the detected edges. Only keep lines that are close to vertical or horizontal giving some grid coordinates. Cluster lines that are closeby together.
+5) Take the [probabalistic Hough transform](https://docs.opencv.org/4.x/d3/de6/tutorial_js_houghlines.html) to get the coordinates of lines in the detected edges. Only keep lines that are close to vertical or horizontal giving some grid coordinates. Cluster lines that are closeby together.
 
 <img src="./assets/blob/lines.png" width="80%" alt="blob lines"/>
 
@@ -217,10 +245,9 @@ The current approach to turning pixel art into useable assets for games are eith
     - Note: The result is sensitive to the number of colors chosen.
     - The parameter is not difficult to tune, but the script may need to be re-run if the colors don't look right.
     - 8, 16, 32, or 64 typically works.
-    - TODO: Find a heuristic for choosing the number of colors.
 
 8) In each cell specified by the mesh, choose the most common color in the cell as the color for the pixel. Recreate the original image with one pixel per cell.
 
-    - Result upsampled by a factor of $20 \times$
+    - Result upscaled by a factor of $20 \times$ using nearest neighbor.
 
-<img src="./assets/blob/upsampled.png" width="80%" alt="blob upsampled"/>
+<img src="./assets/blob/upsampled.png" width="80%" alt="blob upscaled"/>
